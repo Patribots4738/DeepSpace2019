@@ -6,9 +6,9 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 
 public class Talon {
 
-    TalonSRX talon;
-    // if youve gone looking here, something terrible has happened, turn back now,
-    // dont touch anything, and find me. Zach 2019-1-27
+public TalonSRX talon;
+    // if you've gone looking here, something terrible has happened, turn back now,
+    // don't touch anything, and find me. Zach 2019-1-27
 
     public Talon(int CANID) {
 
@@ -24,9 +24,21 @@ public class Talon {
 
     }
 
+    public void changeToPotentiometer(){
+
+        talon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Absolute);
+
+    }
+
     public void setInverted(boolean isInverted){
 
         talon.setInverted(isInverted);
+
+    }
+
+    public void setSensorPhase(boolean phase){
+
+        talon.setSensorPhase(phase);
 
     }
 
@@ -67,6 +79,12 @@ public class Talon {
 
     }
 
+    public void setRawPosition(int clicks){
+
+        talon.set(ControlMode.Position, clicks);
+
+    }
+
     public int getEncoderValue() {
       
         return talon.getSelectedSensorPosition();
@@ -78,5 +96,18 @@ public class Talon {
         return talon.getSelectedSensorVelocity();
 
     }
+
+    public void resetEncoder(){
+
+        talon.setSelectedSensorPosition(0);
+
+    }
+
+    public void setPIDVelocity(double speed){
+
+        talon.set(ControlMode.Velocity, speed);
+
+    }
+
 
 }

@@ -18,7 +18,7 @@ public class Arm {
     int postition = 0;// 0 is resting, 1 is ready to shoot, 2 is slapped down to get a hatch, and 3 is
                       // down to get a ball
 
-    public Arm(DoubleSoleniod arms, SingleSolenoid pusher, AdaptableDrive intake, Talon talon) {
+    public Arm(DoubleSoleniod arms, SingleSolenoid pusher, AdaptableDrive intake, int talonID) {
 
         push = pusher;
 
@@ -27,13 +27,17 @@ public class Arm {
         this.intake = intake;
         intake.giveNames("intake");
 
-        rotator = talon;
+        rotator = new Talon(talonID);
 
         rotator.setMaxOutput(1, -1);
         rotator.setP(1);
         rotator.setI(0);
         rotator.setD(0);
-        rotator.setInverted(true);
+        rotator.setInverted(false);
+        rotator.resetEncoder();
+        rotator.setSensorPhase(false);
+        rotator.changeToPotentiometer();
+        rotator.setPosition(0);
 
     }
 
@@ -43,22 +47,22 @@ public class Arm {
 
         case 0:
 
-            rotator.setPosition(0);
+            rotator.setPosition(0);//resting, should be base position at the start of the match to keep it inside our frame limit
             break;
 
         case 1:
 
-            rotator.setPosition(20);
+            rotator.setPosition(0.15);//perpendicular to the floor, ready to shoot
             break;
-
+ 
         case 2:
 
-            rotator.setPosition(60);
+            rotator.setPosition(0.85);//parallel to the floor, slapped down on top of a hatch
             break;
 
         case 3:
 
-            rotator.setPosition(40);
+            rotator.setPosition(0.5);//angled a good bit relative to the floor, partitally down to get a ball
             break;
 
         }
@@ -71,29 +75,49 @@ public class Arm {
 
     }
 
+    public void test(double percent){
+
+        rotator.setPercent(percent);
+
+    }
+
     public void toggleArms(boolean toggleState) {
 
         armSoleniod.toggleWithState(toggleState);
 
     }
 
-    public void setIntake(boolean backwardsOrForwards) {
+    public void setIntakeForward() {
 
-        if (backwardsOrForwards) {
+        intake.controlMotorGroups(1, "All");
 
-            intake.controlMotorGroups(1, "All");
+    }
 
-        }
+    public void setIntakeBackward(){
 
-        if (!backwardsOrForwards) {
+        intake.controlMotorGroups(-1, "All");
 
-            intake.controlMotorGroups(-1, "All");
+    }
 
-        } else {
+    public void stopIntake(){
 
-            intake.controlMotorGroups(0, "All");
+        intake.controlMotorGroups(0, "All");
 
-        }
+    }
+
+    public void resetEncoder(){
+
+        rotator.resetEncoder();
+
+    }
+
+    public void manual(double power){
+
+        double pos = 0;
+
+        pos += power * 15;
+
+        rotator.setPosition(pos);
 
     }
 

@@ -9,7 +9,7 @@ public class DoubleSoleniod {
 	public DoubleSoleniod(int port1, int port2) {
 
 		DoubleSol = new edu.wpi.first.wpilibj.DoubleSolenoid(port1, port2);
-
+		DoubleSol.set(Value.kReverse);
 	}
 
 	public void activateForwardChannel() {

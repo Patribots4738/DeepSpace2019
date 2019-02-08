@@ -32,7 +32,7 @@ public class AdaptableDrive {
 
         } else {
 
-            int[] nameIndexes = findIndexOfname(names);
+            int[] nameIndexes = findIndexOfnames(names);
 
             for (int j = 0; j < nameIndexes.length; j++) {
 
@@ -44,7 +44,7 @@ public class AdaptableDrive {
 
     }
 
-    private int[] findIndexOfname(String[] namesToFind) {
+    private int[] findIndexOfnames(String[] namesToFind) {
         int[] indexes = new int[namesToFind.length];
         int indexCounter = 0;
 

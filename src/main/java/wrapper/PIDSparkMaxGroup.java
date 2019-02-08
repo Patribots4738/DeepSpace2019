@@ -20,7 +20,7 @@ public class PIDSparkMaxGroup implements MotorGroup {
             CANSparkMax motor = new CANSparkMax(deviceID, CANSparkMaxLowLevel.MotorType.kBrushless);
             CANPIDController CANSpark = new CANPIDController(motor);
             CANSpark.setP(1.5);
-            CANSpark.setI(0.05);
+            CANSpark.setI(0.2);
             CANSpark.setD(0);
             CANSpark.setIZone(0);
             CANSpark.setFF(0);
@@ -29,6 +29,7 @@ public class PIDSparkMaxGroup implements MotorGroup {
         }
 
     }
+    
 
     public void control(double motorInput) {
 

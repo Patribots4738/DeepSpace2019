@@ -1,7 +1,8 @@
 package hardware;
 
 import wrapper.Talon;
-import utils.ValueChanger;
+import wrapper.TogglableButton;
+import utils.Mathd;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
@@ -9,10 +10,12 @@ import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 public class Elevator {
 
     
-    ValueChanger ballUp = new ValueChanger();
-    ValueChanger ballDown = new ValueChanger();
-    ValueChanger hatchUp = new ValueChanger();
-    ValueChanger hatchDown = new ValueChanger();
+    TogglableButton hatch1;
+    TogglableButton hatch2;
+    TogglableButton hatch3;
+    TogglableButton ball1;
+    TogglableButton ball2;
+    TogglableButton ball3;
 
     Talon talon;
 
@@ -29,70 +32,122 @@ public class Elevator {
 
         talon = new Talon(talonCANID);
         slave = new VictorSPX(victorCANID);
+        masterID = talonCANID;
+        hatchLevel = 0;
+        ballLevel = 0;
 
-        talon.setMaxOutput(0.5, -0.5);
+        talon.setMaxOutput(0.35, -0.35);
         talon.setP(1);
         talon.setI(0);
         talon.setD(0);
-        talon.setInverted(true);
+        talon.setInverted(false);
+        
+
+        hatch1 = new TogglableButton();
+        hatch2 = new TogglableButton();
+        hatch3 = new TogglableButton();
+        ball1 = new TogglableButton();
+        ball2 = new TogglableButton();
+        ball3 = new TogglableButton();
 
     }
 
     public void setBallHeight(int level) {
 
         talon.setPosition(rotationsPerBallLevel * level);
-        slave.set(ControlMode.Follower, masterID);
+        slave.follow(talon.talon);
 
     }
 
     public void setHatchHeight(int level) {
 
-        if(level == 1){
+        if(level == 0){
+
+            talon.setPosition(0);
+            slave.follow(talon.talon);
+
+        }
+
+        else if(level == 1){
 
             talon.setPosition(rotationsToFirstHatch);
-            slave.set(ControlMode.Follower, masterID);
+            slave.follow(talon.talon);
 
         } else{
 
-        talon.setPosition((rotationsPerHatchLevel * level) + rotationsToFirstHatch);
-        slave.set(ControlMode.Follower, masterID);
+        talon.setPosition((rotationsPerHatchLevel * Math.max(level - 1,0 )) + rotationsToFirstHatch);
+        slave.follow(talon.talon);
 
         }
     }
 
-    public void incrementBallHeight(boolean upButton, boolean downButton) {
+    public void setBallHeight(boolean height1, boolean height2, boolean height3) {
 
-        if (ballUp.valueChanged(upButton)) {
+        if (ball1.isDown(height1)) {
 
-            ballLevel += 1;
-
-        }
-
-        if (ballDown.valueChanged(downButton)) {
-
-            ballLevel -= 1;
+            ballLevel = 1;
 
         }
 
-        setBallHeight(ballLevel);
+        if (ball2.isDown(height2)) {
+
+            ballLevel = 2 ;
+
+        }
+
+        if (ball3.isDown(height3)){
+
+            ballLevel = 3;
+
+        }
+
+        setBallHeight((int)Mathd.clamp(ballLevel, 3, 0));
 
     }
 
-    public void incrementHatchHeight(boolean upButton, boolean downButton) {
+    public void setHatchHeight(boolean height1, boolean height2, boolean height3) {
+        if (hatch1.isDown(height1)) {
 
-        if (hatchUp.valueChanged(upButton)) {
-
-            hatchLevel += 1;
-
-        }
-
-        if (hatchDown.valueChanged(downButton)) {
-
-            hatchLevel -= 1;
+            hatchLevel = 1;
 
         }
 
-        setHatchHeight(hatchLevel);
+        if (hatch2.isDown(height2)) {
+
+            hatchLevel = 2 ;
+
+        }
+
+        if (hatch3.isDown(height3)){
+
+            hatchLevel = 3;
+
+        }
+
+        setHatchHeight((int)Mathd.clamp(hatchLevel, 2, 0));
+
+    }
+
+    public void reset(){
+
+        talon.setPosition(0);
+        slave.follow(talon.talon);
+        ballLevel = 0;
+        hatchLevel = 0;
+
+    }
+
+    public void manual(double power){
+
+        talon.setPercent(power);
+        slave.follow(talon.talon);
+        
+    }
+
+    public void stop(){
+
+        talon.setPercent(0);
+        slave.set(ControlMode.PercentOutput, 0);
 
     }
 

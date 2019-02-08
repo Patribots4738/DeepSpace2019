@@ -8,6 +8,11 @@ public class Drive {
     MotorGroup LeftMotors;
     MotorGroup RightMotors;
 
+    double linearCutoff = 0.5;
+    double turningCutoff = 0.5;
+    double linearSpeedMultiplier = 1;
+    int turnInPlacePrecision = 4;
+
     public Drive(MotorGroup LeftMotors, MotorGroup RightMotors) {
 
         this.LeftMotors = LeftMotors;
@@ -55,21 +60,30 @@ public class Drive {
 
     }
 
+    public void configureCurvature(double[] configs){
+
+        linearCutoff = configs[0];
+        turningCutoff = configs[1];
+        linearSpeedMultiplier = configs[2];
+        turnInPlacePrecision = (int)configs[3];
+
+    }
+
     public void curvature(double throttle, double turning) {
 
         boolean turnInPlace = Mathd.isBetween(throttle, 0.07, -0.07);
 
-        double linearParabolicConverter = 1;
+        double linearParabolicConverter = 1 * linearSpeedMultiplier;
 
         double wideTurnConverter = 1;
 
-        if(!Mathd.isBetween(throttle, 0.5, -0.5)){
+        if(!Mathd.isBetween(throttle, linearCutoff, -linearCutoff)){
 
             linearParabolicConverter = Math.abs(throttle);
 
         }
 
-        if(!Mathd.isBetween(turning, 0.5, -0.5)){
+        if(!Mathd.isBetween(turning, turningCutoff, -turningCutoff)){
 
             wideTurnConverter = Math.abs(turning);
 
@@ -77,7 +91,7 @@ public class Drive {
 
         if (turnInPlace) {
 
-            ultraParabolic(throttle, turning, 4);
+            ultraParabolic(throttle, turning * 0.75 , turnInPlacePrecision);
 
         }
         
@@ -85,11 +99,11 @@ public class Drive {
 
             double convertedThrottle = throttle * linearParabolicConverter;
 
-            double convertedTurning = -turning * wideTurnConverter;
+            double convertedTurning = turning * wideTurnConverter;
 
             double angleToMaintain = (Math.PI * convertedTurning) / Math.PI;
 
-            double speedDifference = Math.atan(angleToMaintain) * convertedThrottle;
+            double speedDifference = (Math.atan(angleToMaintain) * convertedThrottle) * Math.signum(-throttle);
 
             double leftMotorInput = convertedThrottle - speedDifference;
             double rightMotorInput = convertedThrottle + speedDifference;

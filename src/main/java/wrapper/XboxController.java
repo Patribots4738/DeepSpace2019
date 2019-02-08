@@ -8,8 +8,8 @@ public class XboxController extends Gamepad {
 	so there are enums for all the different axes and buttons on xboxControllers
 	but sometimes you need to use their numbers, so here's a key for you:
 	Joysticks:
-	0: left y axis
-	1: left x axis
+	0: left x axis
+	1: left y axis
 	2: left trigger (only 0 - 1)
 	3: right trigger (only 0 -1)
 	4: right x axis
@@ -33,11 +33,11 @@ public class XboxController extends Gamepad {
 	}
 
 	public Vector getLeftStick() {
-		return new Vector(this.getAxis(0), -this.getAxis(1));
+		return new Vector(this.getAxis(0), -this.getAxis(1));//this is inverted because for some reason full foward is -1
 	}
 
 	public Vector getRightStick() {
-		return new Vector(this.getAxis(4), this.getAxis(5));
+		return new Vector(this.getAxis(4), -this.getAxis(5));//this is inverted because for some reason full foward is -1
 	}
 
 	public double getRightTrigger() {

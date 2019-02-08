@@ -1,25 +1,29 @@
 package frc.robot;
 
-import edu.wpi.first.wpilibj.IterativeRobot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import wrapper.*;
 import hardware.*;
 import interfaces.MotorGroup;
 import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.DigitalOutput;
 
 public class Robot extends TimedRobot {
 
   XboxController driverXbox;
-  Gamepad operatorStick;
+  //Gamepad operatorStick;
+  XboxController driver2Xbox;
 
   MotorGroup leftMotors;
   MotorGroup rightMotors;
+
   MotorGroup intakeMotors;
   Talon rotator;
 
   SingleSolenoid pusher;
   DoubleSoleniod arms;
+
+  DoubleSoleniod test1;
+  DoubleSoleniod test2;
+  SingleSolenoid test3;
 
   Drive drive;
   AdaptableDrive intake;
@@ -27,7 +31,6 @@ public class Robot extends TimedRobot {
   Compressor comp;
 
   Keybinder driverKeys;
-
   Keybinder operatorKeys;
 
   Elevator elevator;
@@ -41,30 +44,32 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
 
-    driverXbox = new XboxController(1);
-    operatorStick = new Gamepad(0);
-
-    driverKeys = new Keybinder(driverXbox);
-    operatorKeys = new Keybinder(operatorStick);
-
-    leftMotors = new PIDSparkMaxGroup(2, 3);
-    rightMotors = new PIDSparkMaxGroup(4, 5);
-    intakeMotors = new VictorSPXGroup(8,9);
-    rotator = new Talon(10);
-
-    pusher = new SingleSolenoid(0);
-    arms = new DoubleSoleniod(1, 2);
-
-    drive = new Drive(leftMotors, rightMotors);
-    intake = new AdaptableDrive(intakeMotors);
-
-    comp = new Compressor();
+    comp = new Compressor(0);
 
     comp.setClosedLoopControl(true);
 
-    elevator = new Elevator(6, 7);
+    driverXbox = new XboxController(Constants.DRIVER_STATION_PORT[1]);
+    //operatorStick = new Gamepad(Constants.DRIVER_STATION_PORT[0]);
+    driver2Xbox = new XboxController(Constants.DRIVER_STATION_PORT[0]);
 
-    arm = new Arm(arms, pusher, intake, rotator);
+    driverKeys = new Keybinder(driverXbox);
+    //operatorKeys = new Keybinder(operatorStick);
+    operatorKeys = new Keybinder(driver2Xbox);
+
+    leftMotors = new PIDSparkMaxGroup(Constants.CAN_ID[2], Constants.CAN_ID[3]);
+    rightMotors = new PIDSparkMaxGroup(Constants.CAN_ID[4], Constants.CAN_ID[5]);
+
+    intakeMotors = new VictorSPXGroup(Constants.CAN_ID[8],Constants.CAN_ID[9]);
+
+    pusher = new SingleSolenoid(Constants.PCM_PORT[7]);
+    arms = new DoubleSoleniod(Constants.PCM_PORT[1], Constants.PCM_PORT[2]);
+
+    drive = new Drive(leftMotors, rightMotors);
+    intake = new AdaptableDrive(intakeMotors);
+    
+    elevator = new Elevator(Constants.CAN_ID[6], Constants.CAN_ID[7]);
+
+    arm = new Arm(arms, pusher, intake, Constants.CAN_ID[10]);
 
   }
 
@@ -86,54 +91,79 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
 
     firstTime = true;
-
+    elevator.reset();
+    SmashBoard.sendBoolean("enabled", false);
+    arm.resetEncoder();
+    elevator.stop();
+    elevator.reset();
+    
   }
 
   @Override
   public void teleopPeriodic() {
-    // don't touch this if statement please
+
+    //don't touch this if statement please
     if (firstTime) {
       driveMode = SmashBoard.getDriveMode();
       driverKeys.bind(SmashBoard.receiveDriverKeys());
       operatorKeys.bind(SmashBoard.receiveOperatorKeys());
+     
+  //    arm.setPosition(0);
+  //    elevator.reset();
+  //    elevator.stop();
       firstTime = false;
     }
 
     double throttle = driverKeys.getThrottle();
     double turning = driverKeys.getTurning();
-  //  double tankLeft = driverKeys.getTankLeftStick();
-  //  double tankRight = driverKeys.getTankRightStick();
+    //double tankLeft = driverKeys.getTankLeftStick();
+    //double tankRight = driverKeys.getTankRightStick();
     boolean toggleForward = driverKeys.getToggleForward();
     if (toggleForward) {
 
       throttle = -throttle;
-    //  tankLeft = -tankLeft;
-   //   tankRight = -tankRight;
+      //tankLeft = -tankLeft;
+      //tankRight = -tankRight;
 
     }
 
+    switch (driveMode) {
+    case ("curvature"):
+      drive.curvature(throttle, turning);
+      break;
 
-    switch (driveMode){
-      case("curvature") :
-        drive.curvature(throttle, turning);        
-        break;
+    case ("arcade"):
+      drive.parabolicArcade(throttle, turning, 1);
+      break;
 
-      case("arcade") :
-        drive.parabolicArcade(throttle, turning, 1);
-        break;
       
-     // case("tank") :
-     //   drive.parabolicTank(tankLeft, tankRight, 1);
-     //   break;
+   // case("tank") :
+   // drive.parabolicTank(tankLeft, tankRight, 1);
+   // break;
+    
 
     }
-    elevator.incrementBallHeight(operatorKeys.getBalUp(), operatorKeys.getBallDown());
 
-    elevator.incrementHatchHeight(operatorKeys.getHatchUp(), operatorKeys.getHatchDown());
+    elevator.manual(operatorKeys.getThrottle());
 
-    arm.toggleArms(driverKeys.getArmsToggle());
+    
 
-    arm.setPush(driverKeys.getHatchLaunch());
+    arm.setPosition(1);
+
+    
+
+    
+    
+    
+
+    arm.setPush(operatorKeys.getHatchLaunch());
+
+  
+  //elevator.setBallHeight(operatorKeys.test1(), operatorKeys.test2(), operatorKeys.test3());
+   //elevator.manual(driverKeys.getThrottle());
+
+
+    
 
   }
 

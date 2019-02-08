@@ -36,7 +36,7 @@ public class Keybinder {// this is a dedicated class for deep space 2019
 	}
 
 
-	//all of these need to be redone
+
 	public double getThrottle() {
 		
 		return joystick.getAxis(dictionary.get("throttle"));
@@ -97,27 +97,63 @@ public class Keybinder {// this is a dedicated class for deep space 2019
 
 	}
 
-	public boolean getBalUp(){
+	public boolean getBall1(){
 
-		return joystick.getButton(dictionary.get("ballUp"));
-
-	}
-
-	public boolean getBallDown(){
-
-		return joystick.getButton(dictionary.get("ballDown"));
+		return joystick.getButton(dictionary.get("ball1"));
 
 	}
 
-	public boolean getHatchUp(){
+	public boolean getBall2(){
 
-		return joystick.getButton(dictionary.get("hatchUp"));
+		return joystick.getButton(dictionary.get("ball2"));
 
 	}
 
-	public boolean getHatchDown(){
+	public boolean getBall3(){
 
-		return joystick.getButton(dictionary.get("hatchDown"));
+		return joystick.getButton(dictionary.get("ball3"));
+
+	}
+
+	public boolean getHatch1(){
+
+		return joystick.getButton(dictionary.get("hatch1"));
+
+	}
+
+	public boolean getHatch2(){
+
+		return joystick.getButton(dictionary.get("hatch2"));
+
+	}
+
+	public boolean getHatch3(){
+
+		return joystick.getButton(dictionary.get("hatch3"));
+
+	}
+
+	public boolean test1(){
+
+		return joystick.getButton(dictionary.get("test1"));
+
+	}
+
+	public boolean test2(){
+
+		return joystick.getButton(dictionary.get("test2"));
+
+	}
+
+	public boolean test3(){
+
+		return joystick.getButton(dictionary.get("test3"));
+
+	}
+
+	public boolean test4(){
+
+		return joystick.getButton(dictionary.get("test4"));
 
 	}
 

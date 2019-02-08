@@ -49,15 +49,23 @@ public class SmashBoard {
     public static String receiveDriverKeys() {
 
         return SmartDashboard.getString("driverKeys",
-                "throttle:1,turning:4,forward:0,wheels:6,ramp:7");
+                "throttle:1,turning:4,forward:0,test1:1");
 
     }
 
     public static String receiveOperatorKeys() {
 
         return SmartDashboard.getString("operatorKeys",
-                "elevatorUp:8,elevatorDown:9,arm:4,slapIntake:5,intakeSuck:0,intakeBlow:3,eject:6");
+                "throttle:1,test1:2,test2:1,test3:2,test4:3,eject:0");
 
+    }
+
+    public static double[] receiveCurvatureConfigs(){
+
+        double[] defualts = {0.5,0.5,1,4};
+
+        return SmartDashboard.getNumberArray("curvyConfigs", defualts);
+        
     }
 
     public static void sendDoubleArray(String destination, double[] array) {
