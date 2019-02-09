@@ -17,7 +17,7 @@ public class Elevator {
     TogglableButton ball2;
     TogglableButton ball3;
 
-    Talon talon;
+  public  Talon talon;
 
     VictorSPX slave;
 
@@ -68,36 +68,31 @@ public class Elevator {
 
         }
 
-        else if(level == 1){
+        else{
 
-            talon.setPosition(rotationsToFirstHatch);
-            slave.follow(talon.talon);
-
-        } else{
-
-        talon.setPosition((rotationsPerHatchLevel * Math.max(level - 1,0 )) + rotationsToFirstHatch);
+        talon.setPosition(rotationsPerHatchLevel * level);
         slave.follow(talon.talon);
-
         }
+        
     }
 
     public void setBallHeight(boolean height1, boolean height2, boolean height3) {
 
         if (ball1.isDown(height1)) {
 
-            ballLevel = 1;
+            ballLevel = 0;
 
         }
 
         if (ball2.isDown(height2)) {
 
-            ballLevel = 2 ;
+            ballLevel = 1 ;
 
         }
 
         if (ball3.isDown(height3)){
 
-            ballLevel = 3;
+            ballLevel = 2;
 
         }
 

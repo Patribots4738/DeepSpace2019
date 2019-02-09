@@ -11,7 +11,7 @@ public class Arm {
 
     DoubleSoleniod armSoleniod;
 
-    Talon rotator;
+   public Talon rotator;
 
     AdaptableDrive intake;
 
@@ -29,8 +29,8 @@ public class Arm {
 
         rotator = new Talon(talonID);
 
-        rotator.setMaxOutput(1, -1);
-        rotator.setP(1);
+        rotator.setMaxOutput(0.5, -0.5);
+        rotator.setP(2);
         rotator.setI(0);
         rotator.setD(0);
         rotator.setInverted(false);
@@ -52,17 +52,17 @@ public class Arm {
 
         case 1:
 
-            rotator.setPosition(0.15);//perpendicular to the floor, ready to shoot
+            rotator.setPosition(0.255);//perpendicular to the floor, ready to shoot
             break;
  
         case 2:
 
-            rotator.setPosition(0.85);//parallel to the floor, slapped down on top of a hatch
+            rotator.setPosition(1.2653);//parallel to the floor, slapped down on top of a hatch
             break;
 
         case 3:
 
-            rotator.setPosition(0.5);//angled a good bit relative to the floor, partitally down to get a ball
+            rotator.setPosition(0.75);//angled a good bit relative to the floor, partitally down to get a ball
             break;
 
         }
@@ -108,16 +108,6 @@ public class Arm {
     public void resetEncoder(){
 
         rotator.resetEncoder();
-
-    }
-
-    public void manual(double power){
-
-        double pos = 0;
-
-        pos += power * 15;
-
-        rotator.setPosition(pos);
 
     }
 

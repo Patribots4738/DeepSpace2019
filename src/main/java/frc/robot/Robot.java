@@ -9,8 +9,8 @@ import edu.wpi.first.wpilibj.Compressor;
 public class Robot extends TimedRobot {
 
   XboxController driverXbox;
-  //Gamepad operatorStick;
-  XboxController driver2Xbox;
+  Gamepad operatorStick;
+  
 
   MotorGroup leftMotors;
   MotorGroup rightMotors;
@@ -48,13 +48,14 @@ public class Robot extends TimedRobot {
 
     comp.setClosedLoopControl(true);
 
-    driverXbox = new XboxController(Constants.DRIVER_STATION_PORT[1]);
-    //operatorStick = new Gamepad(Constants.DRIVER_STATION_PORT[0]);
-    driver2Xbox = new XboxController(Constants.DRIVER_STATION_PORT[0]);
+ //   driverXbox = new XboxController(Constants.DRIVER_STATION_PORT[1]);
+    operatorStick = new Gamepad(Constants.DRIVER_STATION_PORT[0]);
+    
+
 
     driverKeys = new Keybinder(driverXbox);
-    //operatorKeys = new Keybinder(operatorStick);
-    operatorKeys = new Keybinder(driver2Xbox);
+    operatorKeys = new Keybinder(operatorStick);
+    
 
     leftMotors = new PIDSparkMaxGroup(Constants.CAN_ID[2], Constants.CAN_ID[3]);
     rightMotors = new PIDSparkMaxGroup(Constants.CAN_ID[4], Constants.CAN_ID[5]);
@@ -105,15 +106,15 @@ public class Robot extends TimedRobot {
     //don't touch this if statement please
     if (firstTime) {
       driveMode = SmashBoard.getDriveMode();
-      driverKeys.bind(SmashBoard.receiveDriverKeys());
+    //  driverKeys.bind(SmashBoard.receiveDriverKeys());
       operatorKeys.bind(SmashBoard.receiveOperatorKeys());
      
-  //    arm.setPosition(0);
-  //    elevator.reset();
-  //    elevator.stop();
+      arm.setPosition(0);
+      elevator.reset();
+      elevator.stop();
       firstTime = false;
     }
-
+/*
     double throttle = driverKeys.getThrottle();
     double turning = driverKeys.getTurning();
     //double tankLeft = driverKeys.getTankLeftStick();
@@ -143,19 +144,39 @@ public class Robot extends TimedRobot {
     
 
     }
+*/
+    //elevator.manual(operatorKeys.getThrottle());
 
-    elevator.manual(operatorKeys.getThrottle());
+
+    
+    if(operatorKeys.test1()){
+
+      arm.setPosition(0);
+
+    }
+
+    if(operatorKeys.test2()){
+
+      arm.setPosition(1);
+
+    }
+
+    if(operatorKeys.test3()){
+
+      arm.setPosition(2);
+
+    }
+
+    if(operatorKeys.test4()){
+
+      arm.setPosition(3);
+
+    }
+
 
     
 
-    arm.setPosition(1);
-
-    
-
-    
-    
-    
-
+    System.out.println(arm.rotator.getEncoderValue());
     arm.setPush(operatorKeys.getHatchLaunch());
 
   
