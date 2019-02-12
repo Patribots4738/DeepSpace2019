@@ -13,7 +13,7 @@ public class AdaptableDrive {
 
     }
 
-    // make sure the names are in the same order as the motorgroups they refer to
+//  make sure the names are in the same order as the motorgroups they refer to
     public void giveNames(String... names) {
 
         this.names = names;

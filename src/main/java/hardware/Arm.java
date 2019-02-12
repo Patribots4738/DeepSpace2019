@@ -15,8 +15,10 @@ public class Arm {
 
     AdaptableDrive intake;
 
-    int postition = 0;// 0 is resting, 1 is ready to shoot, 2 is slapped down to get a hatch, and 3 is
-                      // down to get a ball
+    String pos ="resting";
+
+    int postition = 0;
+//  0 is resting, 1 is ready to shoot, 2 is slapped down to get a hatch, and 3 is down to get a ball
 
     public Arm(DoubleSoleniod arms, SingleSolenoid pusher, AdaptableDrive intake, int talonID) {
 
@@ -41,28 +43,34 @@ public class Arm {
 
     }
 
-    public void setPosition(int pos) {
+    public void setPosition(String pos) {
 
-        switch (pos) {// all the values for the setPosition are placeholder
+        this.pos = pos;
 
-        case 0:
+        switch (pos) {
 
-            rotator.setPosition(0);//resting, should be base position at the start of the match to keep it inside our frame limit
+        case "resting":
+//          resting, should be base position at the start of the match to keep it inside our frame limit 
+            rotator.setMaxOutput(0.5, -0.30);
+            rotator.setPosition(0);
             break;
 
-        case 1:
-
-            rotator.setPosition(0.255);//perpendicular to the floor, ready to shoot
+        case "shoot":
+//          perpendicular to the floor, ready to shoot
+            rotator.setMaxOutput(0.5, -0.5);
+            rotator.setPosition(0.255);
             break;
  
-        case 2:
-
-            rotator.setPosition(1.2653);//parallel to the floor, slapped down on top of a hatch
+        case "slap":
+//          parallel to the floor, slapped down on top of a hatch
+            rotator.setMaxOutput(0.10, -0.20); 
+            rotator.setPosition(1.27);
             break;
 
-        case 3:
-
-            rotator.setPosition(0.75);//angled a good bit relative to the floor, partitally down to get a ball
+        case "ball":
+//          angled a good bit relative to the floor, partitally down to get a ball
+            rotator.setMaxOutput(0.5, -0.5);
+            rotator.setPosition(0.75);
             break;
 
         }
@@ -108,6 +116,12 @@ public class Arm {
     public void resetEncoder(){
 
         rotator.resetEncoder();
+
+    }
+
+    public String getPos(){
+
+        return pos;
 
     }
 

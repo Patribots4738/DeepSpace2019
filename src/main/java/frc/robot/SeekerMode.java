@@ -4,15 +4,9 @@ import wrapper.PIDSparkMaxGroup;
 
 public class SeekerMode {
 
-    double rotationsPerDegree = 0.0111;
+    double rotationsPerDegree = 61/2880;
 
-    double distancePerRotation = 25.1327;
-
-    double currentLeftPosition = 0;
-    double currentRightPosition = 0;
-
-    boolean firstSeek = true;
-    boolean firstGo = true;
+    double rotationsPerInch = 360/(8 * Math.PI);
 
     PIDSparkMaxGroup leftMotors;
     PIDSparkMaxGroup rightMotors;
@@ -24,34 +18,19 @@ public class SeekerMode {
 
     }
 
-    public void seek(double angle) {
+    public void rotate(double angle){
 
-        if (firstSeek) {
-
-            currentLeftPosition += angle * rotationsPerDegree;
-            currentRightPosition += -angle * rotationsPerDegree;
-            firstSeek = false;
-
-        }
-
-        leftMotors.position(currentLeftPosition, 0.5);
-        rightMotors.position(currentRightPosition, 0.5);
+        leftMotors.addPosition(angle * rotationsPerDegree, 0.3);
+        rightMotors.addPosition(angle * rotationsPerDegree, 0.3);
 
     }
 
-    public void go(double distance) {
+    public void move(double distance){
 
-        if (firstGo) {
-
-            currentLeftPosition += distance * distancePerRotation;
-            currentRightPosition += distance * distancePerRotation;
-            firstGo = false;
-
-        }
-
-        leftMotors.position(currentLeftPosition, 0.5);
-        rightMotors.position(currentRightPosition, 0.5);
+        leftMotors.addPosition(distance * rotationsPerInch, 0.3);
+        rightMotors.addPosition(distance * rotationsPerInch, -0.3);
 
     }
+
 
 }

@@ -2,6 +2,7 @@ package wrapper;
 
 import java.util.*;
 
+import com.revrobotics.CANEncoder;
 import com.revrobotics.CANPIDController;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel;
@@ -11,13 +12,15 @@ import interfaces.MotorGroup;
 
 public class PIDSparkMaxGroup implements MotorGroup {
 
-  public  ArrayList<CANPIDController> motors = new ArrayList<>();
+  public ArrayList<CANPIDController> motors = new ArrayList<>();
+  public ArrayList<CANEncoder> encoders = new ArrayList<>();
 
     public PIDSparkMaxGroup(int... deviceIDs) {
 
         for (int deviceID : deviceIDs) {
 
             CANSparkMax motor = new CANSparkMax(deviceID, CANSparkMaxLowLevel.MotorType.kBrushless);
+            CANEncoder encoder = new CANEncoder(motor);
             CANPIDController CANSpark = new CANPIDController(motor);
             CANSpark.setP(1.5);
             CANSpark.setI(0.2);
@@ -25,6 +28,7 @@ public class PIDSparkMaxGroup implements MotorGroup {
             CANSpark.setIZone(0);
             CANSpark.setFF(0);
             motors.add(CANSpark);
+            encoders.add(encoder);
 
         }
 
@@ -41,13 +45,26 @@ public class PIDSparkMaxGroup implements MotorGroup {
 
     }
 
-    public void position(double position, double speed){
+    public void position(double rotatations, double speed){
 
         for(int i = 0; i < motors.size(); i++){
 
             motors.get(i).setOutputRange(speed * 0.98, speed * 1.02);
-            motors.get(i).setReference(position, ControlType.kPosition);
+            motors.get(i).setReference(rotatations, ControlType.kPosition);
             
+
+        }
+
+    }
+
+    public void addPosition(double rotatations, double speed){
+
+        for(int i = 0; i < motors.size(); i++){
+
+            double pos = encoders.get(i).getPosition();
+            motors.get(i).setOutputRange(speed * 0.98, speed * 1.02);
+            motors.get(i).setReference(rotatations + pos, ControlType.kPosition);
+
 
         }
 

@@ -7,8 +7,9 @@ import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 public class Talon {
 
 public TalonSRX talon;
-    // if you've gone looking here, something terrible has happened, turn back now,
-    // don't touch anything, and find me. Zach 2019-1-27
+//  if you've gone looking here, something terrible has happened, turn back now,
+//  don't touch anything, and find me. Zach 2019-1-27
+//  if this has broken and I've graduated, then you have some googling to do
 
     public Talon(int CANID) {
 

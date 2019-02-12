@@ -36,7 +36,7 @@ public class Elevator {
         hatchLevel = 0;
         ballLevel = 0;
 
-        talon.setMaxOutput(0.35, -0.35);
+        talon.setMaxOutput(0.45, -0.45);
         talon.setP(1);
         talon.setI(0);
         talon.setD(0);

@@ -12,8 +12,8 @@ public class Robot extends TimedRobot {
   Gamepad operatorStick;
   
 
-  MotorGroup leftMotors;
-  MotorGroup rightMotors;
+  PIDSparkMaxGroup leftMotors;
+  PIDSparkMaxGroup rightMotors;
 
   MotorGroup intakeMotors;
   Talon rotator;
@@ -37,6 +37,8 @@ public class Robot extends TimedRobot {
 
   Arm arm;
 
+  SeekerMode autoRotate;
+
   boolean firstTime;
 
   String driveMode;
@@ -48,10 +50,8 @@ public class Robot extends TimedRobot {
 
     comp.setClosedLoopControl(true);
 
- //   driverXbox = new XboxController(Constants.DRIVER_STATION_PORT[1]);
+    driverXbox = new XboxController(Constants.DRIVER_STATION_PORT[1]);
     operatorStick = new Gamepad(Constants.DRIVER_STATION_PORT[0]);
-    
-
 
     driverKeys = new Keybinder(driverXbox);
     operatorKeys = new Keybinder(operatorStick);
@@ -59,6 +59,8 @@ public class Robot extends TimedRobot {
 
     leftMotors = new PIDSparkMaxGroup(Constants.CAN_ID[2], Constants.CAN_ID[3]);
     rightMotors = new PIDSparkMaxGroup(Constants.CAN_ID[4], Constants.CAN_ID[5]);
+
+    autoRotate = new SeekerMode(leftMotors, rightMotors);
 
     intakeMotors = new VictorSPXGroup(Constants.CAN_ID[8],Constants.CAN_ID[9]);
 
@@ -103,30 +105,44 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
 
-    //don't touch this if statement please
+//  don't touch this if statement please
     if (firstTime) {
       driveMode = SmashBoard.getDriveMode();
-    //  driverKeys.bind(SmashBoard.receiveDriverKeys());
+      driverKeys.bind(SmashBoard.receiveDriverKeys());
       operatorKeys.bind(SmashBoard.receiveOperatorKeys());
      
-      arm.setPosition(0);
+      arm.setPosition("resting");
       elevator.reset();
       elevator.stop();
       firstTime = false;
     }
-/*
+
+    boolean driverIsInControl = driverKeys.test1();
+
     double throttle = driverKeys.getThrottle();
     double turning = driverKeys.getTurning();
-    //double tankLeft = driverKeys.getTankLeftStick();
-    //double tankRight = driverKeys.getTankRightStick();
+
+/*
+    double tankLeft = driverKeys.getTankLeftSticFk();
+    double tankRight = driverKeys.getTankRightStick();
     boolean toggleForward = driverKeys.getToggleForward();
     if (toggleForward) {
 
       throttle = -throttle;
-      //tankLeft = -tankLeft;
-      //tankRight = -tankRight;
+      tankLeft = -tankLeft;
+      tankRight = -tankRight;
 
     }
+*/
+    
+
+    if (!driverIsInControl){
+
+      autoRotate.rotate(90);
+
+    }
+
+    if (driverIsInControl){
 
     switch (driveMode) {
     case ("curvature"):
@@ -136,53 +152,58 @@ public class Robot extends TimedRobot {
     case ("arcade"):
       drive.parabolicArcade(throttle, turning, 1);
       break;
+/*
+    case("tank") :
+      drive.parabolicTank(tankLeft, tankRight, 1);
+      break;
+*/
+    }
 
-      
-   // case("tank") :
-   // drive.parabolicTank(tankLeft, tankRight, 1);
-   // break;
-    
+  }    
+
+
+/*
+    if(operatorKeys.test1()){
+
+      arm.setPosition("resting");
 
     }
 */
-    //elevator.manual(operatorKeys.getThrottle());
-
-
-    
-    if(operatorKeys.test1()){
-
-      arm.setPosition(0);
-
-    }
-
     if(operatorKeys.test2()){
 
-      arm.setPosition(1);
+      arm.setPosition("shoot");
 
     }
 
     if(operatorKeys.test3()){
 
-      arm.setPosition(2);
+      arm.setPosition("slap");
 
     }
-
+/*
     if(operatorKeys.test4()){
 
-      arm.setPosition(3);
+      arm.setPosition("ball");
+
+    }
+*/    
+    arm.setPush(operatorKeys.getHatchLaunch());
+  
+//    elevator.setBallHeight(operatorKeys.test1(), operatorKeys.test2(), operatorKeys.test3());
+
+  if (!arm.getPos().equals("resting")){
+
+    double elevatorSpeed = operatorKeys.getThrottle();
+
+    if(elevatorSpeed < 0){
+
+     elevatorSpeed = elevatorSpeed * 0.5;
 
     }
 
+   elevator.manual(elevatorSpeed);
 
-    
-
-    System.out.println(arm.rotator.getEncoderValue());
-    arm.setPush(operatorKeys.getHatchLaunch());
-
-  
-  //elevator.setBallHeight(operatorKeys.test1(), operatorKeys.test2(), operatorKeys.test3());
-   //elevator.manual(driverKeys.getThrottle());
-
+  }
 
     
 
