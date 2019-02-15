@@ -35,7 +35,7 @@ public class Arm {
         rotator.setI(0);
         rotator.setD(0);
         rotator.setInverted(false);
-    rotator.resetEncoder();
+   //    rotator.resetEncoder();
         rotator.setSensorPhase(false);
         rotator.changeToPotentiometer();
 
