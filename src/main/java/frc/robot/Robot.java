@@ -64,7 +64,7 @@ public class Robot extends TimedRobot {
 
     autoRotate = new SeekerMode(leftMotors, rightMotors);
 
-    intakeMotors = new VictorSPXGroup(Constants.CAN_ID[8],Constants.CAN_ID[9]);
+    intakeMotors = new VictorSPXGroup(Constants.CAN_ID[8], Constants.CAN_ID[9]);
 
     pusher = new SingleSolenoid(Constants.PCM_PORT[7]);
     arms = new DoubleSoleniod(Constants.PCM_PORT[1], Constants.PCM_PORT[2]);
@@ -98,7 +98,7 @@ public class Robot extends TimedRobot {
     firstTime = true;
     elevator.reset();
     SmashBoard.sendBoolean("enabled", false);
-  //arm.resetEncoder();
+    arm.resetEncoder();
     elevator.stop();
 
   }
@@ -106,40 +106,32 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
 
-//  don't touch this if statement please
+    // don't touch this if statement please
     if (firstTime) {
-//     driveMode = SmashBoard.getDriveMode();
-//     driverKeys.bind(SmashBoard.receiveDriverKeys());
-//     operatorKeys.bind(SmashBoard.receiveOperatorKeys());
-     
-//     arm.setPosition("resting");
-//     elevator.reset();
-      keyKeys.bind("test1:0,test2:1,test3:2,test4:3");
+      driveMode = SmashBoard.getDriveMode();
+      driverKeys.bind(SmashBoard.receiveDriverKeys());
+      operatorKeys.bind(SmashBoard.receiveOperatorKeys());
+
+      arm.setPosition("resting");
+      elevator.reset();
+      // keyKeys.bind("test1:0,test2:1,test3:2,test4:3");
       elevator.stop();
       firstTime = false;
     }
 
-   
+    double throttle = driverKeys.getThrottle();
+    double turning = driverKeys.getTurning();
 
-//    double throttle = driverKeys.getThrottle();
-//    double turning = driverKeys.getTurning();
+    /*
+     * double tankLeft = driverKeys.getTankLeftSticFk(); double tankRight =
+     * driverKeys.getTankRightStick(); boolean toggleForward =
+     * driverKeys.getToggleForward(); if (toggleForward) {
+     * 
+     * throttle = -throttle; tankLeft = -tankLeft; tankRight = -tankRight;
+     * 
+     * }
+     */
 
-/*
-    double tankLeft = driverKeys.getTankLeftSticFk();
-    double tankRight = driverKeys.getTankRightStick();
-    boolean toggleForward = driverKeys.getToggleForward();
-    if (toggleForward) {
-
-      throttle = -throttle;
-      tankLeft = -tankLeft;
-      tankRight = -tankRight;
-
-    }
-*/
-    
-
-    
-/*
     switch (driveMode) {
     case ("curvature"):
       drive.curvature(throttle, turning);
@@ -148,85 +140,78 @@ public class Robot extends TimedRobot {
     case ("arcade"):
       drive.parabolicArcade(throttle, turning, 1);
       break;
-/*
-    case("tank") :
-      drive.parabolicTank(tankLeft, tankRight, 1);
-      break;
-*/
-//    }
 
-  
+    /*
+     * case ("tank"): drive.parabolicTank(tankLeft, tankRight, 1); break;
+     */
 
-/*
-    if(operatorKeys.test1()){
+    }
+
+    if (operatorKeys.test1()) {
 
       arm.setPosition("resting");
 
     }
 
-    if(operatorKeys.test2()){
+    if (operatorKeys.test2()) {
 
       arm.setPosition("shoot");
 
     }
 
-    if(operatorKeys.test3()){
+    if (operatorKeys.test3()) {
 
       arm.setPosition("slap");
 
     }
 
-    if(operatorKeys.test4()){
+    if (operatorKeys.test4()) {
 
       arm.setPosition("ball");
 
     }
-*/    
-//    arm.setPush(operatorKeys.getHatchLaunch());
-  
-//    elevator.setBallHeight(operatorKeys.test1(), operatorKeys.test2(), operatorKeys.test3());
 
+    arm.setPush(operatorKeys.getHatchLaunch());
 
-/*
-  if (!arm.getPos().equals("resting")){
+    if (!arm.getPos().equals("resting")) {
 
-    double elevatorSpeed = operatorKeys.getThrottle();
+      double elevatorSpeed = operatorKeys.getThrottle();
 
-    if(elevatorSpeed < 0){
+      if (elevatorSpeed < 0) {
 
-     elevatorSpeed = elevatorSpeed * 0.5;
+        elevatorSpeed = elevatorSpeed * 0.5;
 
-    }
+      }
 
-   elevator.manual(elevatorSpeed);
-
-  }
-*/
-
-    if(keyKeys.getButton("test1")){
-
-      arm.setPosition("resting");
+      elevator.manual(elevatorSpeed);
 
     }
 
-    if(keyKeys.getButton("test2")){
-
-      arm.setPosition("shoot");
-
-    }
-
-    if(keyKeys.getButton("test3")){
-
-      arm.setPosition("slap");
-
-    }
-
-    if(keyKeys.getButton("test4")){
-
-      arm.setPosition("ball");
-
-    }
-    
+    /*
+     * if (keyKeys.getButton("test1")) {
+     * 
+     * arm.setPosition("resting");
+     * 
+     * }
+     * 
+     * if (keyKeys.getButton("test2")) {
+     * 
+     * arm.setPosition("shoot");
+     * 
+     * }
+     * 
+     * if (keyKeys.getButton("test3")) {
+     * 
+     * arm.setPosition("slap");
+     * 
+     * }
+     * 
+     * if (keyKeys.getButton("test4")) {
+     * 
+     * arm.setPosition("ball");
+     * 
+     * }
+     */
 
   }
 
