@@ -68,6 +68,13 @@ public TalonSRX talon;
 
     }
 
+    public void setMinOutput(double minForward, double minReverse){
+
+        talon.configNominalOutputForward(minForward, 20);
+        talon.configNominalOutputReverse(minReverse, 20);
+
+    }
+
     public void setPercent(double percentOutput) {
 
         talon.set(ControlMode.PercentOutput, percentOutput);
@@ -107,6 +114,12 @@ public TalonSRX talon;
     public void setPIDVelocity(double speed){
 
         talon.set(ControlMode.Velocity, speed);
+
+    }
+
+    public double getRotations(){
+
+        return talon.getSelectedSensorPosition()/4096;
 
     }
 

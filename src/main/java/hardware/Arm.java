@@ -15,10 +15,9 @@ public class Arm {
 
     AdaptableDrive intake;
 
-    String pos ="resting";
+    double gearRotationsPerArmRotation = 3.75 * 1/360;
 
-    int postition = 0;
-//  0 is resting, 1 is ready to shoot, 2 is slapped down to get a hatch, and 3 is down to get a ball
+    String pos ="resting";
 
     public Arm(DoubleSoleniod arms, SingleSolenoid pusher, AdaptableDrive intake, int talonID) {
 
@@ -36,10 +35,10 @@ public class Arm {
         rotator.setI(0);
         rotator.setD(0);
         rotator.setInverted(false);
-        rotator.resetEncoder();
+    rotator.resetEncoder();
         rotator.setSensorPhase(false);
         rotator.changeToPotentiometer();
-        rotator.setPosition(0);
+
 
     }
 
@@ -52,25 +51,25 @@ public class Arm {
         case "resting":
 //          resting, should be base position at the start of the match to keep it inside our frame limit 
             rotator.setMaxOutput(0.5, -0.30);
-            rotator.setPosition(0);
+            rotateDegrees(0);
             break;
 
         case "shoot":
 //          perpendicular to the floor, ready to shoot
             rotator.setMaxOutput(0.5, -0.5);
-            rotator.setPosition(0.255);
+            rotateDegrees(20);
             break;
  
         case "slap":
 //          parallel to the floor, slapped down on top of a hatch
-            rotator.setMaxOutput(0.10, -0.20); 
-            rotator.setPosition(1.27);
+            rotator.setMaxOutput(0.15, -0.30); 
+            rotateDegrees(110);
             break;
 
         case "ball":
 //          angled a good bit relative to the floor, partitally down to get a ball
             rotator.setMaxOutput(0.5, -0.5);
-            rotator.setPosition(0.75);
+            rotateDegrees(55);
             break;
 
         }
@@ -80,12 +79,6 @@ public class Arm {
     public void setPush(boolean pushState) {
 
         push.setTo(pushState);
-
-    }
-
-    public void test(double percent){
-
-        rotator.setPercent(percent);
 
     }
 
@@ -122,6 +115,12 @@ public class Arm {
     public String getPos(){
 
         return pos;
+
+    }
+
+    public void rotateDegrees(double degrees){
+
+        rotator.setPosition(degrees * gearRotationsPerArmRotation);
 
     }
 
