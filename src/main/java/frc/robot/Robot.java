@@ -198,7 +198,7 @@ public class Robot extends TimedRobot {
     }
   } else{
 
-    arm.manaul(-operatorKeys.getJoystick("armThrottle"));
+    arm.manual(operatorKeys.getJoystick("armThrottle"));
 
   }
 
@@ -223,7 +223,7 @@ public class Robot extends TimedRobot {
     arm.toggleArms(operatorKeys.getArmsToggle());
 
     arm.setPush(operatorKeys.getHatchLaunch());
-
+/*
     if (!arm.getPos().equals("resting")) {
 
       double elevatorSpeed = operatorKeys.getThrottle();
@@ -243,8 +243,16 @@ public class Robot extends TimedRobot {
       elevator.manual(0);
 
     }
+*/
+    double elevatorSpeed = operatorKeys.getThrottle();
 
+    if (elevatorSpeed < 0) {
 
+     elevatorSpeed = elevatorSpeed * 0.5;
+
+    }
+
+    elevator.manual(elevatorSpeed);
 
   }
 

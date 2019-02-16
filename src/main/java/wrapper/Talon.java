@@ -99,6 +99,12 @@ public TalonSRX talon;
 
     }
 
+    public void addRaw(double clicks){
+
+        talon.set(ControlMode.Position, clicks + getEncoderValue());
+
+    }
+
     public int getEncoderValue() {
       
         return talon.getSelectedSensorPosition();
