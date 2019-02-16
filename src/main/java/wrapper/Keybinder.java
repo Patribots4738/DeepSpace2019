@@ -35,7 +35,23 @@ public class Keybinder {// this is a dedicated class for deep space 2019
 
 	}
 
+	public double getJoystick(String stickKey){
 
+		return joystick.getAxis(dictionary.get(stickKey));
+
+	}
+
+	public boolean getButton(String buttonKey){
+
+		return joystick.getButton(dictionary.get(buttonKey));
+
+	}
+
+	public boolean getToggle(String buttonKey){
+
+		return joystick.getToggle(dictionary.get(buttonKey));
+
+	}
 
 	public double getThrottle() {
 		

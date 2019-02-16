@@ -20,6 +20,7 @@ public class KeyBinderDictionary {
         names[addIndex] = key;
         vals[addIndex] = val;
         addIndex++;
+        
     }
 
     public int get(String key) {

@@ -27,4 +27,10 @@ public class VictorSPXGroup implements MotorGroup{
 
     }
 
+    public VictorSPX getMotor(int index){
+
+        return motors.get(index);
+
+    }
+
 }

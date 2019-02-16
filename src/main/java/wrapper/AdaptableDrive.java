@@ -13,7 +13,7 @@ public class AdaptableDrive {
 
     }
 
-//  make sure the names are in the same order as the motorgroups they refer to
+    // make sure the names are in the same order as the motorgroups they refer to
     public void giveNames(String... names) {
 
         this.names = names;
@@ -44,7 +44,7 @@ public class AdaptableDrive {
 
     }
 
-    private int[] findIndexOfnames(String[] namesToFind) {
+    public int[] findIndexOfnames(String... namesToFind) {
         int[] indexes = new int[namesToFind.length];
         int indexCounter = 0;
 
@@ -64,6 +64,28 @@ public class AdaptableDrive {
         }
 
         return indexes;
+
+    }
+
+    public MotorGroup getMotorGroup(String name) {
+
+        return motorGroups[findIndexOfnames(name)[0]];
+
+    }
+
+    public MotorGroup[] getMotorGroups(String... names) {
+
+        int[] indexes = findIndexOfnames(names);
+
+        MotorGroup[] groups = new MotorGroup[indexes.length];
+
+        for (int i = 0; i < indexes.length; i++) {
+
+            groups[indexes[i]] = motorGroups[indexes[i]];
+
+        }
+
+        return groups;
 
     }
 
