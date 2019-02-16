@@ -3,6 +3,7 @@ package hardware;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
+import utils.Mathd;
 import wrapper.DoubleSoleniod;
 import wrapper.SingleSolenoid;
 import wrapper.Talon;
@@ -132,9 +133,19 @@ public class Arm {
 
     }
 
-    public void manaul(double input){
+    public void manual(double input){
 
         rotator.setPercent(input);
+
+    }
+
+    public void positionalManual(double input){
+
+        rotator.setMaxOutput(0.6, -0.6);
+
+        if(!Mathd.isBetween(input, 0.07, -0.07))
+
+        rotator.setPosition(input  * 100);
 
     }
 

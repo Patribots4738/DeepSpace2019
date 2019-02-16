@@ -52,11 +52,14 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
+
+    SmashBoard.sendBoolean("enabled", false);
+
     try {
       cam = CameraServer.getInstance().startAutomaticCapture();
       cam.setResolution(240,160);
       cam.setFPS(30);
-      cam.setExposureManual(0);
+      cam.setExposureManual(50);
     } catch (Exception e) {
       System.err.println("camera not there");
     }
@@ -108,10 +111,15 @@ public class Robot extends TimedRobot {
     
     firstTime = true;
     elevator.reset();
-    SmashBoard.sendBoolean("enabled", false);
+    SmashBoard.sendBoolean("enabled", true);
     elevator.stop();
     arms.deactivate();
 
+  }
+
+  @Override
+  public void disabledInit() {
+    //SmashBoard.sendBoolean("enabled", false);
   }
 
   @Override
@@ -122,7 +130,7 @@ public class Robot extends TimedRobot {
       driveMode = SmashBoard.getDriveMode();
       driverKeys.bind(SmashBoard.receiveDriverKeys());
       operatorKeys.bind(SmashBoard.receiveOperatorKeys());
-
+      
       arm.rotateDegrees(0);
       elevator.reset();
       keyKeys.bind("test1:0,test2:1,test3:2,test4:3,test5:4,test6:5");
@@ -190,7 +198,7 @@ public class Robot extends TimedRobot {
     }
   } else{
 
-    arm.manaul(-operatorKeys.getJoystick("armThrottle"));
+    arm.manual(operatorKeys.getJoystick("armThrottle"));
 
   }
 
@@ -215,7 +223,7 @@ public class Robot extends TimedRobot {
     arm.toggleArms(operatorKeys.getArmsToggle());
 
     arm.setPush(operatorKeys.getHatchLaunch());
-
+/*
     if (!arm.getPos().equals("resting")) {
 
       double elevatorSpeed = operatorKeys.getThrottle();
@@ -235,8 +243,16 @@ public class Robot extends TimedRobot {
       elevator.manual(0);
 
     }
+*/
+    double elevatorSpeed = operatorKeys.getThrottle();
 
+    if (elevatorSpeed < 0) {
 
+     elevatorSpeed = elevatorSpeed * 0.5;
+
+    }
+
+    elevator.manual(elevatorSpeed);
 
   }
 
