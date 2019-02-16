@@ -56,6 +56,7 @@ public class Robot extends TimedRobot {
       cam = CameraServer.getInstance().startAutomaticCapture();
       cam.setResolution(240,160);
       cam.setFPS(30);
+      cam.setExposureManual(0);
     } catch (Exception e) {
       System.err.println("camera not there");
     }
