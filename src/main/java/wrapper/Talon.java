@@ -93,6 +93,12 @@ public TalonSRX talon;
 
     }
 
+    public void addRotations(double rotatations){
+
+        talon.set(ControlMode.Position, rotatations * 4096 + getEncoderValue());
+
+    }
+
     public int getEncoderValue() {
       
         return talon.getSelectedSensorPosition();

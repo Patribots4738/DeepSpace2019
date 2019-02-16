@@ -3,7 +3,12 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import wrapper.*;
 import hardware.*;
-import interfaces.MotorGroup;
+
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+
+import edu.wpi.cscore.CameraServerJNI;
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Compressor;
 
 public class Robot extends TimedRobot {
@@ -15,8 +20,10 @@ public class Robot extends TimedRobot {
   PIDSparkMaxGroup leftMotors;
   PIDSparkMaxGroup rightMotors;
 
-  MotorGroup intakeMotors;
   Talon rotator;
+
+  VictorSPX leftIntake;
+  VictorSPX rightIntake;
 
   SingleSolenoid pusher;
   DoubleSoleniod arms;
@@ -26,7 +33,8 @@ public class Robot extends TimedRobot {
   SingleSolenoid test3;
 
   Drive drive;
-  AdaptableDrive intake;
+
+  UsbCamera cam;
 
   Compressor comp;
 
@@ -38,18 +46,22 @@ public class Robot extends TimedRobot {
 
   Arm arm;
 
-  SeekerMode autoRotate;
-
   boolean firstTime;
 
   String driveMode;
 
   @Override
   public void robotInit() {
-
+    try {
+      cam = CameraServer.getInstance().startAutomaticCapture();
+      cam.setResolution(240,160);
+      cam.setFPS(30);
+    } catch (Exception e) {
+      System.err.println("camera not there");
+    }
     comp = new Compressor(0);
 
-    comp.setClosedLoopControl(false);
+    comp.setClosedLoopControl(true);
 
     driverXbox = new XboxController(Constants.DRIVER_STATION_PORT[1]);
     operatorStick = new Gamepad(Constants.DRIVER_STATION_PORT[0]);
@@ -62,19 +74,17 @@ public class Robot extends TimedRobot {
     leftMotors = new PIDSparkMaxGroup(Constants.CAN_ID[2], Constants.CAN_ID[3]);
     rightMotors = new PIDSparkMaxGroup(Constants.CAN_ID[4], Constants.CAN_ID[5]);
 
-    autoRotate = new SeekerMode(leftMotors, rightMotors);
-
-    intakeMotors = new VictorSPXGroup(Constants.CAN_ID[8], Constants.CAN_ID[9]);
+    leftIntake = new VictorSPX(8);
+    rightIntake = new VictorSPX(9);
 
     pusher = new SingleSolenoid(Constants.PCM_PORT[7]);
     arms = new DoubleSoleniod(Constants.PCM_PORT[1], Constants.PCM_PORT[2]);
 
     drive = new Drive(leftMotors, rightMotors);
-    intake = new AdaptableDrive(intakeMotors);
 
     elevator = new Elevator(Constants.CAN_ID[6], Constants.CAN_ID[7]);
 
-    arm = new Arm(arms, pusher, intake, Constants.CAN_ID[10]);
+    arm = new Arm(arms, pusher, rightIntake, leftIntake, Constants.CAN_ID[10]);
 
   }
 
@@ -94,12 +104,12 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-
+    
     firstTime = true;
     elevator.reset();
     SmashBoard.sendBoolean("enabled", false);
-    arm.resetEncoder();
     elevator.stop();
+    arms.deactivate();
 
   }
 
@@ -112,9 +122,9 @@ public class Robot extends TimedRobot {
       driverKeys.bind(SmashBoard.receiveDriverKeys());
       operatorKeys.bind(SmashBoard.receiveOperatorKeys());
 
-      arm.setPosition("resting");
+      arm.rotateDegrees(0);
       elevator.reset();
-      // keyKeys.bind("test1:0,test2:1,test3:2,test4:3");
+      keyKeys.bind("test1:0,test2:1,test3:2,test4:3,test5:4,test6:5");
       elevator.stop();
       firstTime = false;
     }
@@ -141,15 +151,22 @@ public class Robot extends TimedRobot {
       drive.parabolicArcade(throttle, turning, 1);
       break;
 
-    /*
-     * case ("tank"): drive.parabolicTank(tankLeft, tankRight, 1); break;
-     */
+    // case ("tank"): drive.parabolicTank(tankLeft, tankRight, 1); break;
 
     }
+
+    if(operatorKeys.getButton("resetArm")){
+
+      arm.resetEncoder();
+
+    }
+
+    if(!operatorKeys.getToggle("toggleManualArm")){
 
     if (operatorKeys.test1()) {
 
       arm.setPosition("resting");
+      elevator.manual(0);
 
     }
 
@@ -159,7 +176,7 @@ public class Robot extends TimedRobot {
 
     }
 
-    if (operatorKeys.test3()) {
+    if (operatorKeys.test3() && operatorKeys.getArmsToggle()) {
 
       arm.setPosition("slap");
 
@@ -170,6 +187,31 @@ public class Robot extends TimedRobot {
       arm.setPosition("ball");
 
     }
+  } else{
+
+    arm.manaul(-operatorKeys.getJoystick("armThrottle"));
+
+  }
+
+    if (operatorKeys.getJoystick("intakeOut") > 0.4) {
+
+      arm.setIntakeBlow();
+
+    }
+
+    else if (operatorKeys.getJoystick("intakeIn") > 0.1 && !(operatorKeys.getJoystick("intakeOut") > 0.4)) {
+
+      arm.setIntakeSuck(operatorKeys.getJoystick("intakeIn") * 0.63);
+
+    }
+
+    else {
+
+      arm.stopIntake();
+
+    }
+
+    arm.toggleArms(operatorKeys.getArmsToggle());
 
     arm.setPush(operatorKeys.getHatchLaunch());
 
@@ -187,31 +229,13 @@ public class Robot extends TimedRobot {
 
     }
 
-    /*
-     * if (keyKeys.getButton("test1")) {
-     * 
-     * arm.setPosition("resting");
-     * 
-     * }
-     * 
-     * if (keyKeys.getButton("test2")) {
-     * 
-     * arm.setPosition("shoot");
-     * 
-     * }
-     * 
-     * if (keyKeys.getButton("test3")) {
-     * 
-     * arm.setPosition("slap");
-     * 
-     * }
-     * 
-     * if (keyKeys.getButton("test4")) {
-     * 
-     * arm.setPosition("ball");
-     * 
-     * }
-     */
+    if(arm.getPos().equals("resting")){
+
+      elevator.manual(0);
+
+    }
+
+
 
   }
 

@@ -1,6 +1,8 @@
 package hardware;
 
-import wrapper.AdaptableDrive;
+import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+
 import wrapper.DoubleSoleniod;
 import wrapper.SingleSolenoid;
 import wrapper.Talon;
@@ -13,32 +15,35 @@ public class Arm {
 
    public Talon rotator;
 
-    AdaptableDrive intake;
+    VictorSPX left;
 
-    double gearRotationsPerArmRotation = 3.75 * 1/360;
+    VictorSPX right;
+
+    double degreeConverter = 3.75 * 1/360; // multiply by the number of degrees you want the arm to turn and it will rotate that much
 
     String pos ="resting";
 
-    public Arm(DoubleSoleniod arms, SingleSolenoid pusher, AdaptableDrive intake, int talonID) {
+    public Arm(DoubleSoleniod arms, SingleSolenoid pusher,VictorSPX right, VictorSPX left, int talonID) {
 
         push = pusher;
 
         armSoleniod = arms;
+        arms.deactivate();
 
-        this.intake = intake;
-        intake.giveNames("intake");
+        this.left = left;
+        this.right = right;
 
         rotator = new Talon(talonID);
 
         rotator.setMaxOutput(0.5, -0.5);
-        rotator.setP(2);
+        rotator.setP(1);
         rotator.setI(0);
         rotator.setD(0);
         rotator.setInverted(false);
-   //    rotator.resetEncoder();
         rotator.setSensorPhase(false);
         rotator.changeToPotentiometer();
-
+        rotator.setPosition(0);
+        rotator.talon.configContinuousCurrentLimit(30);
 
     }
 
@@ -50,26 +55,26 @@ public class Arm {
 
         case "resting":
 //          resting, should be base position at the start of the match to keep it inside our frame limit 
-            rotator.setMaxOutput(0.5, -0.30);
-            rotateDegrees(0);
+            rotator.setMaxOutput(0.5, -0.75);
+            rotateDegrees(10);
             break;
 
         case "shoot":
 //          perpendicular to the floor, ready to shoot
-            rotator.setMaxOutput(0.5, -0.5);
-            rotateDegrees(20);
+            rotator.setMaxOutput(0.5, -1);
+            rotateDegrees(30);
             break;
  
         case "slap":
 //          parallel to the floor, slapped down on top of a hatch
-            rotator.setMaxOutput(0.15, -0.30); 
-            rotateDegrees(110);
+            rotator.setMaxOutput(0.15, -0.45); 
+            rotateDegrees(128);
             break;
 
         case "ball":
 //          angled a good bit relative to the floor, partitally down to get a ball
-            rotator.setMaxOutput(0.5, -0.5);
-            rotateDegrees(55);
+            rotator.setMaxOutput(0.42, -0.5);
+            rotateDegrees(60);
             break;
 
         }
@@ -88,21 +93,24 @@ public class Arm {
 
     }
 
-    public void setIntakeForward() {
+    public void setIntakeBlow() {
 
-        intake.controlMotorGroups(1, "All");
-
-    }
-
-    public void setIntakeBackward(){
-
-        intake.controlMotorGroups(-1, "All");
+        left.set(ControlMode.PercentOutput, 1);
+        right.set(ControlMode.PercentOutput, -1);
 
     }
 
     public void stopIntake(){
 
-        intake.controlMotorGroups(0, "All");
+        left.set(ControlMode.PercentOutput, 0);
+        right.set(ControlMode.PercentOutput, 0);
+
+    }
+
+    public void setIntakeSuck(double percent){
+
+        left.set(ControlMode.PercentOutput, -percent);
+        right.set(ControlMode.PercentOutput, percent);
 
     }
 
@@ -120,7 +128,13 @@ public class Arm {
 
     public void rotateDegrees(double degrees){
 
-        rotator.setPosition(degrees * gearRotationsPerArmRotation);
+        rotator.setPosition(degrees * degreeConverter);
+
+    }
+
+    public void manaul(double input){
+
+        rotator.setPercent(input);
 
     }
 
