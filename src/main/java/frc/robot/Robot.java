@@ -5,6 +5,7 @@ import wrapper.*;
 import hardware.*;
 
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.ctre.phoenix.motorcontrol.ControlMode;
 
 import edu.wpi.cscore.CameraServerJNI;
 import edu.wpi.cscore.UsbCamera;
@@ -131,7 +132,7 @@ public class Robot extends TimedRobot {
       driverKeys.bind(SmashBoard.receiveDriverKeys());
       operatorKeys.bind(SmashBoard.receiveOperatorKeys());
       
-      arm.rotateDegrees(0);
+     // arm.rotateDegrees(0);
       elevator.reset();
       keyKeys.bind("test1:0,test2:1,test3:2,test4:3,test5:4,test6:5");
       elevator.stop();
@@ -141,19 +142,24 @@ public class Robot extends TimedRobot {
     double throttle = driverKeys.getThrottle();
     double turning = driverKeys.getTurning();
 
-    /*
-     * double tankLeft = driverKeys.getTankLeftSticFk(); double tankRight =
-     * driverKeys.getTankRightStick(); boolean toggleForward =
-     * driverKeys.getToggleForward(); if (toggleForward) {
-     * 
-     * throttle = -throttle; tankLeft = -tankLeft; tankRight = -tankRight;
-     * 
-     * }
-     */
+    
+      //double tankLeft = driverKeys.getTankLeftSticFk(); double tankRight =
+     // driverKeys.getTankRightStick();
+      boolean toggleForward = driverKeys.getToggleForward(); 
+     if (toggleForward) {
+      
+      throttle = -throttle; 
+      
+      }
+     
 
     switch (driveMode) {
     case ("curvature"):
       drive.curvature(throttle, turning);
+      break;
+
+    case("curvy"):
+      drive.partialParabolic(throttle, -turning);
       break;
 
     case ("arcade"):
@@ -169,7 +175,7 @@ public class Robot extends TimedRobot {
       arm.resetEncoder();
 
     }
-
+/*
     if(!operatorKeys.getToggle("toggleManualArm")){
 
     if (operatorKeys.test1()) {
@@ -197,10 +203,36 @@ public class Robot extends TimedRobot {
 
     }
   } else{
+*/
+    //arm.positionalManual(operatorKeys.getJoystick("armThrottle"));
 
-    arm.manual(operatorKeys.getJoystick("armThrottle"));
+    boolean isFirst = true;
+/*
+    if(operatorKeys.getToggle("lockArm")){
 
-  }
+      if(isFirst){
+
+        arm.resetEncoder();
+        isFirst = false;
+
+      }
+      
+      arm.rotator.talon.set(ControlMode.Position, 0);
+      
+    }
+    
+    if(!operatorKeys.getToggle("lockArm")){
+
+      arm.manual(operatorKeys.getJoystick("armThrottle"));
+      isFirst = true;
+    }
+*/
+
+arm.manual(operatorKeys.getJoystick("armThrottle"));
+    
+
+  //  System.out.println(arm.rotator.getEncoderSpeed());
+ // }
 
     if (operatorKeys.getJoystick("intakeOut") > 0.4) {
 

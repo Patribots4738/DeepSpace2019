@@ -151,4 +151,17 @@ public class Drive {
 
     }
 
+    public void partialParabolic(double throttle, double turning){
+
+        double effectiveThrottle = Math.signum(throttle) * Math.pow(throttle * Math.signum(throttle), 1 + (throttle * Math.signum(throttle)));
+        double effectiveTurning = Math.signum(turning) * Math.pow(turning * Math.signum(turning), 1 + (turning * Math.signum(turning)));;
+
+        double leftMotorInput = effectiveThrottle - effectiveTurning;
+        double rightMotorInput = effectiveThrottle + effectiveTurning;
+
+        LeftMotors.control(leftMotorInput);
+        RightMotors.control(-rightMotorInput);
+
+    }
+
 }

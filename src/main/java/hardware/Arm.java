@@ -14,17 +14,18 @@ public class Arm {
 
     DoubleSoleniod armSoleniod;
 
-   public Talon rotator;
+    public Talon rotator;
 
     VictorSPX left;
 
     VictorSPX right;
 
-    double degreeConverter = 3.75 * 1/360; // multiply by the number of degrees you want the arm to turn and it will rotate that much
+    double degreeConverter = 3.75 * 1 / 360; // multiply by the number of degrees you want the arm to turn and it will
+                                             // rotate that much
 
-    String pos ="resting";
+    String pos = "resting";
 
-    public Arm(DoubleSoleniod arms, SingleSolenoid pusher,VictorSPX right, VictorSPX left, int talonID) {
+    public Arm(DoubleSoleniod arms, SingleSolenoid pusher, VictorSPX right, VictorSPX left, int talonID) {
 
         push = pusher;
 
@@ -55,25 +56,26 @@ public class Arm {
         switch (pos) {
 
         case "resting":
-//          resting, should be base position at the start of the match to keep it inside our frame limit 
+            // resting, should be base position at the start of the match to keep it inside
+            // our frame limit
             rotator.setMaxOutput(0.5, -0.75);
             rotateDegrees(10);
             break;
 
         case "shoot":
-//          perpendicular to the floor, ready to shoot
+            // perpendicular to the floor, ready to shoot
             rotator.setMaxOutput(0.5, -1);
             rotateDegrees(30);
             break;
- 
+
         case "slap":
-//          parallel to the floor, slapped down on top of a hatch
-            rotator.setMaxOutput(0.15, -0.45); 
+            // parallel to the floor, slapped down on top of a hatch
+            rotator.setMaxOutput(0.15, -0.45);
             rotateDegrees(128);
             break;
 
         case "ball":
-//          angled a good bit relative to the floor, partitally down to get a ball
+            // angled a good bit relative to the floor, partitally down to get a ball
             rotator.setMaxOutput(0.42, -0.5);
             rotateDegrees(60);
             break;
@@ -101,52 +103,56 @@ public class Arm {
 
     }
 
-    public void stopIntake(){
+    public void stopIntake() {
 
         left.set(ControlMode.PercentOutput, 0);
         right.set(ControlMode.PercentOutput, 0);
 
     }
 
-    public void setIntakeSuck(double percent){
+    public void setIntakeSuck(double percent) {
 
         left.set(ControlMode.PercentOutput, -percent);
         right.set(ControlMode.PercentOutput, percent);
 
     }
 
-    public void resetEncoder(){
+    public void resetEncoder() {
 
         rotator.resetEncoder();
 
     }
 
-    public String getPos(){
+    public String getPos() {
 
         return pos;
 
     }
 
-    public void rotateDegrees(double degrees){
+    public void rotateDegrees(double degrees) {
 
         rotator.setPosition(degrees * degreeConverter);
 
     }
 
-    public void manual(double input){
+    public void manual(double input) {
 
         rotator.setPercent(input);
 
     }
 
-    public void positionalManual(double input){
+    public void PIDmanual(double input){
 
-        rotator.setMaxOutput(0.6, -0.6);
-
-        if(!Mathd.isBetween(input, 0.07, -0.07))
-
-        rotator.setPosition(input  * 100);
+        rotator.setPIDVelocity(input);
 
     }
 
+    public void lock(){
+
+        rotator.setMaxOutput(1, -1);
+        resetEncoder();
+        rotator.talon.set(ControlMode.Position, 0);
+
+    }
+    
 }
