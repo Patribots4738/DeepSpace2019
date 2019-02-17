@@ -3,7 +3,6 @@ package hardware;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 
-import utils.Mathd;
 import wrapper.DoubleSoleniod;
 import wrapper.SingleSolenoid;
 import wrapper.Talon;

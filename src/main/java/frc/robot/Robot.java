@@ -11,6 +11,7 @@ import com.ctre.phoenix.motorcontrol.ControlMode;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalInput;
 
 public class Robot extends TimedRobot {
 
@@ -49,6 +50,8 @@ public class Robot extends TimedRobot {
 
   boolean firstTime;
 
+  DigitalInput limitSwitch;
+
   String driveMode;
 
   boolean isFirst1 = true;
@@ -70,6 +73,8 @@ public class Robot extends TimedRobot {
     comp = new Compressor(0);
 
     comp.setClosedLoopControl(true);
+
+    limitSwitch = new DigitalInput(0);
 
     driverXbox = new XboxController(Constants.DRIVER_STATION_PORT[1]);
     operatorStick = new Gamepad(Constants.DRIVER_STATION_PORT[0]);
@@ -141,6 +146,8 @@ public class Robot extends TimedRobot {
       firstTime = false;
     }
 
+    boolean armIsBack = !limitSwitch.get();
+
     double throttle = driverKeys.getThrottle();
     double turning = driverKeys.getTurning();
 
@@ -178,7 +185,13 @@ public class Robot extends TimedRobot {
 
       armThrottle = Math.signum(armThrottle) * Math.pow(armThrottle * Math.signum(armThrottle), 1 + (armThrottle * Math.signum(armThrottle)));
 
-      arm.manual(-operatorKeys.getJoystick("armThrottle"));
+      if(armIsBack && armThrottle < 0){
+
+        armThrottle = 0;
+
+      }
+
+      arm.manual(armThrottle);
       isFirst1 = true;
 
     }
@@ -217,27 +230,6 @@ public class Robot extends TimedRobot {
     arm.toggleArms(operatorKeys.getArmsToggle());
 
     arm.setPush(operatorKeys.getHatchLaunch());
-    /*
-     * if (!arm.getPos().equals("resting")) {
-     * 
-     * double elevatorSpeed = operatorKeys.getThrottle();
-     * 
-     * if (elevatorSpeed < 0) {
-     * 
-     * elevatorSpeed = elevatorSpeed * 0.5;
-     * 
-     * }
-     * 
-     * elevator.manual(elevatorSpeed);
-     * 
-     * }
-     * 
-     * if(arm.getPos().equals("resting")){
-     * 
-     * elevator.manual(0);
-     * 
-     * }
-     */
 
     if (!Mathd.isBetween(operatorKeys.getJoystick("throttle"), 0.07, -0.07)) {
 
@@ -248,6 +240,12 @@ public class Robot extends TimedRobot {
       if (eleSpeed < 0) {
 
         eleSpeed = eleSpeed * 0.5;
+
+      }
+
+      if(armIsBack){
+
+        eleSpeed = 0;
 
       }
 
