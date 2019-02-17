@@ -174,6 +174,10 @@ public class Robot extends TimedRobot {
    
     if (!Mathd.isBetween(operatorKeys.getJoystick("armThrottle"), 0.07, -0.07)) {
 
+      double armThrottle = operatorKeys.getJoystick("armThrottle");
+
+      armThrottle = Math.signum(armThrottle) * Math.pow(armThrottle * Math.signum(armThrottle), 1 + (armThrottle * Math.signum(armThrottle)));
+
       arm.manual(-operatorKeys.getJoystick("armThrottle"));
       isFirst1 = true;
 
@@ -237,15 +241,17 @@ public class Robot extends TimedRobot {
 
     if (!Mathd.isBetween(operatorKeys.getJoystick("throttle"), 0.07, -0.07)) {
 
-      double elevatorSpeed = -operatorKeys.getThrottle();
+      double eleThrottle = operatorKeys.getThrottle();
 
-      if (elevatorSpeed < 0) {
+      double eleSpeed = Math.signum(eleThrottle) * Math.pow(eleThrottle * Math.signum(eleThrottle), 1 + (eleThrottle * Math.signum(eleThrottle)));
 
-        elevatorSpeed = elevatorSpeed * 0.5;
+      if (eleSpeed < 0) {
+
+        eleSpeed = eleSpeed * 0.5;
 
       }
 
-      elevator.manual(elevatorSpeed);
+      elevator.manual(-eleSpeed);
       isFirst2 = true;
 
     }
