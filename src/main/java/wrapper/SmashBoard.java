@@ -56,7 +56,7 @@ public class SmashBoard {
     public static String receiveOperatorKeys() {
 
         return SmartDashboard.getString("operatorKeys",
-                "eject:5,arm:4,throttle:1,intakeOut:2,intakeIn:3,toggleManualArm:7,armThrottle:5,resetArm:6,lockArm:0");
+                "eject:5,arm:4,throttle:1,intakeOut:2,intakeIn:3,toggleManualArm:7,armThrottle:5,resetArm:6");
 
     }
 

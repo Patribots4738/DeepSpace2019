@@ -153,6 +153,18 @@ public class Drive {
 
     public void partialParabolic(double throttle, double turning){
 
+        if(Mathd.isBetween(throttle, 0.05, -0.05)){
+
+            throttle = 0;
+
+        }
+
+        if(Mathd.isBetween(turning, 0.05, -0.05)){
+
+            turning = 0;
+
+        }
+
         double effectiveThrottle = Math.signum(throttle) * Math.pow(throttle * Math.signum(throttle), 1 + (throttle * Math.signum(throttle)));
         double effectiveTurning = Math.signum(turning) * Math.pow(turning * Math.signum(turning), 1 + (turning * Math.signum(turning)));;
 

@@ -59,6 +59,12 @@ public class Elevator {
 
     }
 
+    public void resetEncoder(){
+
+        talon.resetEncoder();
+
+    }
+
     public void setHatchHeight(int level) {
 
         if(level == 0){
