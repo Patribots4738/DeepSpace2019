@@ -3,19 +3,24 @@ package frc.robot;
 import edu.wpi.first.wpilibj.TimedRobot;
 import wrapper.*;
 import hardware.*;
+import utils.Mathd;
 
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.mach.LightDrive.LightDrivePWM;
+import com.mach.LightDrive.*;
+import com.ctre.phoenix.motorcontrol.ControlMode;
 
-import edu.wpi.cscore.CameraServerJNI;
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Servo;
 
-public class Robot extends TimedRobot {
+public class Robot extends TimedRobot { 
 
   XboxController driverXbox;
   Gamepad operatorStick;
-  Gamepad keyboard;
 
   PIDSparkMaxGroup leftMotors;
   PIDSparkMaxGroup rightMotors;
@@ -28,10 +33,6 @@ public class Robot extends TimedRobot {
   SingleSolenoid pusher;
   DoubleSoleniod arms;
 
-  DoubleSoleniod test1;
-  DoubleSoleniod test2;
-  SingleSolenoid test3;
-
   Drive drive;
 
   UsbCamera cam;
@@ -40,7 +41,6 @@ public class Robot extends TimedRobot {
 
   Keybinder driverKeys;
   Keybinder operatorKeys;
-  Keybinder keyKeys;
 
   Elevator elevator;
 
@@ -48,16 +48,31 @@ public class Robot extends TimedRobot {
 
   boolean firstTime;
 
+  DigitalInput limitSwitch;
+
   String driveMode;
+
+  boolean isFirst1 = true;
+  boolean isFirst2 = true;
+
+  LEDStrip LED;
+
+  int counter;
+
+  boolean fadeIn;
+
+  DriverStation driverStat;
 
   @Override
   public void robotInit() {
 
     SmashBoard.sendBoolean("enabled", false);
 
+    driverStat = DriverStation.getInstance();
+
     try {
       cam = CameraServer.getInstance().startAutomaticCapture();
-      cam.setResolution(240,160);
+      cam.setResolution(240, 160);
       cam.setFPS(30);
       cam.setExposureManual(50);
     } catch (Exception e) {
@@ -67,13 +82,17 @@ public class Robot extends TimedRobot {
 
     comp.setClosedLoopControl(true);
 
+    limitSwitch = new DigitalInput(0);
+
+    LED = new LEDStrip(0, 1);
+
+    //LEDS = new LightDrivePWM(servo1, servo2);
+
     driverXbox = new XboxController(Constants.DRIVER_STATION_PORT[1]);
     operatorStick = new Gamepad(Constants.DRIVER_STATION_PORT[0]);
-    keyboard = new Gamepad(4);
 
     driverKeys = new Keybinder(driverXbox);
     operatorKeys = new Keybinder(operatorStick);
-    keyKeys = new Keybinder(keyboard);
 
     leftMotors = new PIDSparkMaxGroup(Constants.CAN_ID[2], Constants.CAN_ID[3]);
     rightMotors = new PIDSparkMaxGroup(Constants.CAN_ID[4], Constants.CAN_ID[5]);
@@ -81,8 +100,8 @@ public class Robot extends TimedRobot {
     leftIntake = new VictorSPX(8);
     rightIntake = new VictorSPX(9);
 
-    pusher = new SingleSolenoid(Constants.PCM_PORT[7]);
-    arms = new DoubleSoleniod(Constants.PCM_PORT[1], Constants.PCM_PORT[2]);
+    pusher = new SingleSolenoid(Constants.PCM_PORT[0]);
+    arms = new DoubleSoleniod(Constants.PCM_PORT[4], Constants.PCM_PORT[5]);
 
     drive = new Drive(leftMotors, rightMotors);
 
@@ -108,18 +127,22 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    
+
     firstTime = true;
-    elevator.reset();
+    elevator.resetEncoder();
     SmashBoard.sendBoolean("enabled", true);
     elevator.stop();
-    arms.deactivate();
+    arm.resetEncoder();
+
+    fadeIn = true;
+
+    counter = 0;
 
   }
 
   @Override
   public void disabledInit() {
-    //SmashBoard.sendBoolean("enabled", false);
+     SmashBoard.sendBoolean("enabled", false);
   }
 
   @Override
@@ -127,80 +150,73 @@ public class Robot extends TimedRobot {
 
     // don't touch this if statement please
     if (firstTime) {
+
+      arm.resetEncoder();
       driveMode = SmashBoard.getDriveMode();
       driverKeys.bind(SmashBoard.receiveDriverKeys());
       operatorKeys.bind(SmashBoard.receiveOperatorKeys());
-      
-      arm.rotateDegrees(0);
-      elevator.reset();
-      keyKeys.bind("test1:0,test2:1,test3:2,test4:3,test5:4,test6:5");
+      elevator.resetEncoder();
       elevator.stop();
       firstTime = false;
+
     }
 
-    double throttle = driverKeys.getThrottle();
+    boolean armIsBack = !limitSwitch.get(); 
+
+    double throttle = -driverKeys.getThrottle();
     double turning = driverKeys.getTurning();
 
-    /*
-     * double tankLeft = driverKeys.getTankLeftSticFk(); double tankRight =
-     * driverKeys.getTankRightStick(); boolean toggleForward =
-     * driverKeys.getToggleForward(); if (toggleForward) {
-     * 
-     * throttle = -throttle; tankLeft = -tankLeft; tankRight = -tankRight;
-     * 
-     * }
-     */
+    boolean toggleForward = driverKeys.getToggleForward();
+    if (toggleForward) {
+
+      throttle = -throttle;
+
+    }
 
     switch (driveMode) {
     case ("curvature"):
       drive.curvature(throttle, turning);
       break;
 
+    case ("curvy"):
+      drive.partialParabolic(throttle, -turning);
+      break;
+
     case ("arcade"):
       drive.parabolicArcade(throttle, turning, 1);
       break;
 
-    // case ("tank"): drive.parabolicTank(tankLeft, tankRight, 1); break;
+    }
+   
+    if (!Mathd.isBetween(operatorKeys.getJoystick("armThrottle"), 0.07, -0.07)) {
+
+      double armThrottle = operatorKeys.getJoystick("armThrottle");
+
+      armThrottle = Math.signum(armThrottle) * Math.pow(armThrottle * Math.signum(armThrottle), 1 + (armThrottle * Math.signum(armThrottle)));
+
+      if(armIsBack && armThrottle < 0){
+
+        armThrottle = 0;
+
+      }
+
+      arm.manual(armThrottle);
+      isFirst1 = true;
 
     }
 
-    if(operatorKeys.getButton("resetArm")){
+    if (Mathd.isBetween(operatorKeys.getJoystick("armThrottle"), 0.07, -0.07)) {
 
-      arm.resetEncoder();
+      if (isFirst1) {
 
-    }
+        arm.resetEncoder();
+        isFirst1 = false;
 
-    if(!operatorKeys.getToggle("toggleManualArm")){
+      }
 
-    if (operatorKeys.test1()) {
-
-      arm.setPosition("resting");
-      elevator.manual(0);
+      arm.rotator.talon.set(ControlMode.Position, 0);
 
     }
-
-    if (operatorKeys.test2()) {
-
-      arm.setPosition("shoot");
-
-    }
-
-    if (operatorKeys.test3() && operatorKeys.getArmsToggle()) {
-
-      arm.setPosition("slap");
-
-    }
-
-    if (operatorKeys.test4()) {
-
-      arm.setPosition("ball");
-
-    }
-  } else{
-
-    arm.manual(operatorKeys.getJoystick("armThrottle"));
-
-  }
 
     if (operatorKeys.getJoystick("intakeOut") > 0.4) {
 
@@ -208,9 +224,13 @@ public class Robot extends TimedRobot {
 
     }
 
-    else if (operatorKeys.getJoystick("intakeIn") > 0.1 && !(operatorKeys.getJoystick("intakeOut") > 0.4)) {
+    else if (operatorKeys.getJoystick("intakeIn") > 0.07 && !(operatorKeys.getJoystick("intakeOut") > 0.4)) {
 
-      arm.setIntakeSuck(operatorKeys.getJoystick("intakeIn") * 0.63);
+      double suckFactor = operatorKeys.getJoystick("intakeIn");
+
+      suckFactor = Math.signum(suckFactor) * Math.pow(suckFactor * Math.signum(suckFactor), 1 + (suckFactor * Math.signum(suckFactor)));
+
+      arm.setIntakeSuck(suckFactor * 0.63);
 
     }
 
@@ -223,37 +243,91 @@ public class Robot extends TimedRobot {
     arm.toggleArms(operatorKeys.getArmsToggle());
 
     arm.setPush(operatorKeys.getHatchLaunch());
-/*
-    if (!arm.getPos().equals("resting")) {
 
-      double elevatorSpeed = operatorKeys.getThrottle();
+    if (!Mathd.isBetween(operatorKeys.getJoystick("throttle"), 0.09, -0.09)) {
 
-      if (elevatorSpeed < 0) {
+      double eleThrottle = -operatorKeys.getThrottle();
 
-        elevatorSpeed = elevatorSpeed * 0.5;
+      double eleSpeed = Math.signum(eleThrottle) * Math.pow(eleThrottle * Math.signum(eleThrottle), 1 + (eleThrottle * Math.signum(eleThrottle)));
+
+      if (eleThrottle < 0) {
+
+        eleSpeed = eleSpeed/2;
 
       }
 
-      elevator.manual(elevatorSpeed);
+      if(armIsBack){
+
+        eleSpeed = 0;
+
+      }
+
+      System.out.println("Raw throttle is: " + operatorKeys.getJoystick("throttle"));
+      System.out.println("Speed sent to talon is: " + eleSpeed);
+
+      elevator.manual(eleSpeed);
+      isFirst2 = true;
 
     }
 
-    if(arm.getPos().equals("resting")){
+    if (Mathd.isBetween(operatorKeys.getJoystick("throttle"), 0.09, -0.09)) {
 
-      elevator.manual(0);
+      if (isFirst2) {
+
+        elevator.resetEncoder();
+        isFirst2 = false;
+
+      }
+
+      elevator.talon.talon.set(ControlMode.Position, 0);
 
     }
-*/
-    double elevatorSpeed = operatorKeys.getThrottle();
 
-    if (elevatorSpeed < 0) {
+    /*
 
-     elevatorSpeed = elevatorSpeed * 0.5;
+    if(counter > 255){
+
+      counter = 255;
+      fadeIn = false;
 
     }
 
-    elevator.manual(elevatorSpeed);
+    if(counter < 0){
+
+      counter = 0;
+      fadeIn = true;
+
+    }
+
+    double redPrecursor = 120 - (( (double) 120/255 ) * ((double)counter));
+
+    int redVal = (int) Math.round(redPrecursor);
+    int greenVal = counter;
+    int blueVal = 255;
+ 
+    LED.setColor(redVal, greenVal, blueVal, 1);
+    LED.setColor(redVal, greenVal, blueVal, 2);
+    LED.setColor(redVal, greenVal, blueVal, 3);
+    LED.setColor(redVal, greenVal, blueVal, 4);
+    
+    if(fadeIn){
+
+      counter++;
+
+    }
+
+    if(!fadeIn){
+
+      counter--;
+
+    }
+
+    */
+
+    //LED.setColor(120, 0, 255, 1);
+    //LED.setColor(120, 0, 255, 2);
+    //LED.setColor(120, 0, 255, 3);
+    //LED.setColor(120, 0, 255, 4);
 
   }
-
 }

@@ -99,7 +99,7 @@ public TalonSRX talon;
 
     }
 
-    public void addRaw(double clicks){
+    public void addRawPosition(double clicks){
 
         talon.set(ControlMode.Position, clicks + getEncoderValue());
 
@@ -116,7 +116,17 @@ public TalonSRX talon;
         return talon.getSelectedSensorVelocity();
 
     }
+/*
+    public double getRPM(){
 
+        double clicksPerSecond = talon.getSelectedSensorVelocity() * 10;
+
+        double returnVal = clicksPerSecond
+
+
+
+    }
+*/
     public void resetEncoder(){
 
         talon.setSelectedSensorPosition(0);
