@@ -153,13 +153,13 @@ public class Drive {
 
     public void partialParabolic(double throttle, double turning){
 
-        if(Mathd.isBetween(throttle, 0.05, -0.05)){
+        if(Mathd.isBetween(throttle, 0.07, -0.07)){
 
             throttle = 0;
 
         }
 
-        if(Mathd.isBetween(turning, 0.05, -0.05)){
+        if(Mathd.isBetween(turning, 0.07, -0.07)){
 
             turning = 0;
 

@@ -6,18 +6,21 @@ import hardware.*;
 import utils.Mathd;
 
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.mach.LightDrive.LightDrivePWM;
+import com.mach.LightDrive.*;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
 import edu.wpi.cscore.UsbCamera;
 import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Servo;
 
-public class Robot extends TimedRobot {
+public class Robot extends TimedRobot { 
 
   XboxController driverXbox;
   Gamepad operatorStick;
-  Gamepad keyboard;
 
   PIDSparkMaxGroup leftMotors;
   PIDSparkMaxGroup rightMotors;
@@ -30,10 +33,6 @@ public class Robot extends TimedRobot {
   SingleSolenoid pusher;
   DoubleSoleniod arms;
 
-  DoubleSoleniod test1;
-  DoubleSoleniod test2;
-  SingleSolenoid test3;
-
   Drive drive;
 
   UsbCamera cam;
@@ -42,7 +41,6 @@ public class Robot extends TimedRobot {
 
   Keybinder driverKeys;
   Keybinder operatorKeys;
-  Keybinder keyKeys;
 
   Elevator elevator;
 
@@ -57,10 +55,20 @@ public class Robot extends TimedRobot {
   boolean isFirst1 = true;
   boolean isFirst2 = true;
 
+  LEDStrip LED;
+
+  int counter;
+
+  boolean fadeIn;
+
+  DriverStation driverStat;
+
   @Override
   public void robotInit() {
 
     SmashBoard.sendBoolean("enabled", false);
+
+    driverStat = DriverStation.getInstance();
 
     try {
       cam = CameraServer.getInstance().startAutomaticCapture();
@@ -76,13 +84,15 @@ public class Robot extends TimedRobot {
 
     limitSwitch = new DigitalInput(0);
 
+    LED = new LEDStrip(0, 1);
+
+    //LEDS = new LightDrivePWM(servo1, servo2);
+
     driverXbox = new XboxController(Constants.DRIVER_STATION_PORT[1]);
     operatorStick = new Gamepad(Constants.DRIVER_STATION_PORT[0]);
-    keyboard = new Gamepad(4);
 
     driverKeys = new Keybinder(driverXbox);
     operatorKeys = new Keybinder(operatorStick);
-    keyKeys = new Keybinder(keyboard);
 
     leftMotors = new PIDSparkMaxGroup(Constants.CAN_ID[2], Constants.CAN_ID[3]);
     rightMotors = new PIDSparkMaxGroup(Constants.CAN_ID[4], Constants.CAN_ID[5]);
@@ -90,8 +100,8 @@ public class Robot extends TimedRobot {
     leftIntake = new VictorSPX(8);
     rightIntake = new VictorSPX(9);
 
-    pusher = new SingleSolenoid(Constants.PCM_PORT[7]);
-    arms = new DoubleSoleniod(Constants.PCM_PORT[1], Constants.PCM_PORT[2]);
+    pusher = new SingleSolenoid(Constants.PCM_PORT[0]);
+    arms = new DoubleSoleniod(Constants.PCM_PORT[4], Constants.PCM_PORT[5]);
 
     drive = new Drive(leftMotors, rightMotors);
 
@@ -119,10 +129,14 @@ public class Robot extends TimedRobot {
   public void teleopInit() {
 
     firstTime = true;
-    elevator.reset();
+    elevator.resetEncoder();
     SmashBoard.sendBoolean("enabled", true);
     elevator.stop();
-    arms.deactivate();
+    arm.resetEncoder();
+
+    fadeIn = true;
+
+    counter = 0;
 
   }
 
@@ -137,18 +151,19 @@ public class Robot extends TimedRobot {
     // don't touch this if statement please
     if (firstTime) {
 
+      arm.resetEncoder();
       driveMode = SmashBoard.getDriveMode();
       driverKeys.bind(SmashBoard.receiveDriverKeys());
       operatorKeys.bind(SmashBoard.receiveOperatorKeys());
-
-      elevator.reset();
+      elevator.resetEncoder();
       elevator.stop();
       firstTime = false;
+
     }
 
-    boolean armIsBack = !limitSwitch.get();
+    boolean armIsBack = !limitSwitch.get(); 
 
-    double throttle = driverKeys.getThrottle();
+    double throttle = -driverKeys.getThrottle();
     double turning = driverKeys.getTurning();
 
     boolean toggleForward = driverKeys.getToggleForward();
@@ -170,12 +185,6 @@ public class Robot extends TimedRobot {
     case ("arcade"):
       drive.parabolicArcade(throttle, turning, 1);
       break;
-
-    }
-
-    if (operatorKeys.getButton("resetArm")) {
-
-      arm.resetEncoder();
 
     }
    
@@ -215,9 +224,13 @@ public class Robot extends TimedRobot {
 
     }
 
-    else if (operatorKeys.getJoystick("intakeIn") > 0.1 && !(operatorKeys.getJoystick("intakeOut") > 0.4)) {
+    else if (operatorKeys.getJoystick("intakeIn") > 0.07 && !(operatorKeys.getJoystick("intakeOut") > 0.4)) {
 
-      arm.setIntakeSuck(operatorKeys.getJoystick("intakeIn") * 0.63);
+      double suckFactor = operatorKeys.getJoystick("intakeIn");
+
+      suckFactor = Math.signum(suckFactor) * Math.pow(suckFactor * Math.signum(suckFactor), 1 + (suckFactor * Math.signum(suckFactor)));
+
+      arm.setIntakeSuck(suckFactor * 0.63);
 
     }
 
@@ -231,15 +244,15 @@ public class Robot extends TimedRobot {
 
     arm.setPush(operatorKeys.getHatchLaunch());
 
-    if (!Mathd.isBetween(operatorKeys.getJoystick("throttle"), 0.07, -0.07)) {
+    if (!Mathd.isBetween(operatorKeys.getJoystick("throttle"), 0.09, -0.09)) {
 
-      double eleThrottle = operatorKeys.getThrottle();
+      double eleThrottle = -operatorKeys.getThrottle();
 
       double eleSpeed = Math.signum(eleThrottle) * Math.pow(eleThrottle * Math.signum(eleThrottle), 1 + (eleThrottle * Math.signum(eleThrottle)));
 
-      if (eleSpeed < 0) {
+      if (eleThrottle < 0) {
 
-        eleSpeed = eleSpeed * 0.5;
+        eleSpeed = eleSpeed/2;
 
       }
 
@@ -249,12 +262,15 @@ public class Robot extends TimedRobot {
 
       }
 
-      elevator.manual(-eleSpeed);
+      System.out.println("Raw throttle is: " + operatorKeys.getJoystick("throttle"));
+      System.out.println("Speed sent to talon is: " + eleSpeed);
+
+      elevator.manual(eleSpeed);
       isFirst2 = true;
 
     }
 
-    if (Mathd.isBetween(operatorKeys.getJoystick("throttle"), 0.07, -0.07)) {
+    if (Mathd.isBetween(operatorKeys.getJoystick("throttle"), 0.09, -0.09)) {
 
       if (isFirst2) {
 
@@ -266,6 +282,52 @@ public class Robot extends TimedRobot {
       elevator.talon.talon.set(ControlMode.Position, 0);
 
     }
+
+    /*
+
+    if(counter > 255){
+
+      counter = 255;
+      fadeIn = false;
+
+    }
+
+    if(counter < 0){
+
+      counter = 0;
+      fadeIn = true;
+
+    }
+
+    double redPrecursor = 120 - (( (double) 120/255 ) * ((double)counter));
+
+    int redVal = (int) Math.round(redPrecursor);
+    int greenVal = counter;
+    int blueVal = 255;
+ 
+    LED.setColor(redVal, greenVal, blueVal, 1);
+    LED.setColor(redVal, greenVal, blueVal, 2);
+    LED.setColor(redVal, greenVal, blueVal, 3);
+    LED.setColor(redVal, greenVal, blueVal, 4);
+    
+    if(fadeIn){
+
+      counter++;
+
+    }
+
+    if(!fadeIn){
+
+      counter--;
+
+    }
+
+    */
+
+    //LED.setColor(120, 0, 255, 1);
+    //LED.setColor(120, 0, 255, 2);
+    //LED.setColor(120, 0, 255, 3);
+    //LED.setColor(120, 0, 255, 4);
 
   }
 }

@@ -41,6 +41,7 @@ public class Elevator {
         talon.setI(0);
         talon.setD(0);
         talon.setInverted(false);
+        talon.setSensorPhase(false);
         
 
         hatch1 = new TogglableButton();
