@@ -49,7 +49,7 @@ public class SmashBoard {
     public static String receiveDriverKeys() {
 
         return SmartDashboard.getString("driverKeys",
-                "throttle:1,turning:4,test1:7,forward:0");
+                "throttle:1,turning:4,test1:7,forward:0,dropWheels:4,dropRamp:5");
 
     }
 
