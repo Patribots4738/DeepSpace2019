@@ -6,8 +6,6 @@ import hardware.*;
 import utils.Mathd;
 
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-import com.mach.LightDrive.LightDrivePWM;
-import com.mach.LightDrive.*;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 
 import edu.wpi.cscore.UsbCamera;
@@ -15,7 +13,6 @@ import edu.wpi.first.cameraserver.CameraServer;
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Servo;
 
 public class Robot extends TimedRobot { 
 
@@ -26,12 +23,18 @@ public class Robot extends TimedRobot {
   PIDSparkMaxGroup rightMotors;
 
   Talon rotator;
+  Talon climbDrive;
 
   VictorSPX leftIntake;
   VictorSPX rightIntake;
 
   SingleSolenoid pusher;
   DoubleSoleniod arms;
+
+  DoubleSoleniod ramp;
+  DoubleSoleniod climbWheels;
+
+  Climber climber;
 
   Drive drive;
 
@@ -86,7 +89,11 @@ public class Robot extends TimedRobot {
 
     LED = new LEDStrip(0, 1);
 
-    //LEDS = new LightDrivePWM(servo1, servo2);
+    climbDrive = new Talon(11);
+    climbWheels = new DoubleSoleniod(7, 6);
+    ramp = new DoubleSoleniod(2, 1);
+
+    climber = new Climber(ramp, climbWheels, climbDrive);
 
     driverXbox = new XboxController(Constants.DRIVER_STATION_PORT[1]);
     operatorStick = new Gamepad(Constants.DRIVER_STATION_PORT[0]);
@@ -133,6 +140,8 @@ public class Robot extends TimedRobot {
     SmashBoard.sendBoolean("enabled", true);
     elevator.stop();
     arm.resetEncoder();
+    climber.setRamp(false);
+    climber.setWheels(false, 0);
 
     fadeIn = true;
 
@@ -166,6 +175,9 @@ public class Robot extends TimedRobot {
     double throttle = -driverKeys.getThrottle();
     double turning = driverKeys.getTurning();
 
+    climber.setWheels(driverKeys.getToggle("dropWheels"), throttle);
+    climber.setRamp(driverKeys.getToggle("dropRamp"));
+
     boolean toggleForward = driverKeys.getToggleForward();
     if (toggleForward) {
 
@@ -179,13 +191,12 @@ public class Robot extends TimedRobot {
       break;
 
     case ("curvy"):
-      drive.partialParabolic(throttle, -turning);
+      drive.partialParabolic(throttle, -turning * 0.98);
       break;
 
     case ("arcade"):
       drive.parabolicArcade(throttle, turning, 1);
       break;
-
     }
    
     if (!Mathd.isBetween(operatorKeys.getJoystick("armThrottle"), 0.07, -0.07)) {
@@ -282,6 +293,8 @@ public class Robot extends TimedRobot {
       elevator.talon.talon.set(ControlMode.Position, 0);
 
     }
+
+    
 
     /*
 

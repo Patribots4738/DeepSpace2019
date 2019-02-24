@@ -28,6 +28,8 @@ public class Elevator {
     int ballLevel = 0;
     int hatchLevel = 0;
 
+    boolean isPracticeBot = true;
+
     public Elevator(int talonCANID, int victorCANID) {
 
         talon = new Talon(talonCANID);
@@ -41,7 +43,7 @@ public class Elevator {
         talon.setI(0);
         talon.setD(0);
         talon.setInverted(false);
-        talon.setSensorPhase(false);
+        talon.setSensorPhase(isPracticeBot);
         
 
         hatch1 = new TogglableButton();
