@@ -191,7 +191,7 @@ public class Robot extends TimedRobot {
       break;
 
     case ("curvy"):
-      drive.partialParabolic(throttle, -turning * 0.98);
+      drive.partialParabolic(throttle, -turning * (Math.abs(turning)));
       break;
 
     case ("arcade"):
@@ -272,9 +272,6 @@ public class Robot extends TimedRobot {
         eleSpeed = 0;
 
       }
-
-      System.out.println("Raw throttle is: " + operatorKeys.getJoystick("throttle"));
-      System.out.println("Speed sent to talon is: " + eleSpeed);
 
       elevator.manual(eleSpeed);
       isFirst2 = true;

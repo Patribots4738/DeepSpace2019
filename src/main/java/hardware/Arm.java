@@ -97,8 +97,8 @@ public class Arm {
 
     public void setIntakeBlow() {
 
-        left.set(ControlMode.PercentOutput, -1);
-        right.set(ControlMode.PercentOutput, 1);
+        left.set(ControlMode.PercentOutput, 1);
+        right.set(ControlMode.PercentOutput, -1);
 
     }
 
@@ -111,8 +111,8 @@ public class Arm {
 
     public void setIntakeSuck(double percent) {
 
-        left.set(ControlMode.PercentOutput, percent);
-        right.set(ControlMode.PercentOutput, -percent);
+        left.set(ControlMode.PercentOutput, -percent);
+        right.set(ControlMode.PercentOutput, percent);
 
     }
 
