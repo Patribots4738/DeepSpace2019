@@ -75,8 +75,8 @@ public class Drive {
 
         double linearParabolicConverter = 1;
 
-        double wideTurnConverter = 1;
-
+      //  double wideTurnConverter = 1;
+/*
         if (!Mathd.isBetween(throttle, 0.5, -0.5)) {
 
             linearParabolicConverter = Math.abs(throttle);
@@ -88,10 +88,11 @@ public class Drive {
             linearParabolicConverter = Math.abs(turning);
 
         }
-
+*/
         if (turnInPlace) {
 
-            ultraParabolic(throttle, turning * 0.75, turnInPlacePrecision);
+          //  ultraParabolic(throttle, turning * 0.75, turnInPlacePrecision);
+          partialParabolic(throttle, turning);
 
         }
 
@@ -99,11 +100,9 @@ public class Drive {
 
             double convertedThrottle = throttle * linearParabolicConverter;
 
-            double convertedTurning = turning * wideTurnConverter;
+            double convertedTurning = turning * Math.signum(throttle);
 
-            double angleToMaintain = (Math.PI * convertedTurning) / Math.PI;
-
-            double speedDifference = (Math.atan(angleToMaintain) * convertedThrottle) * Math.signum(-throttle);
+            double speedDifference = (Math.atan(convertedTurning) * convertedThrottle);
 
             double leftMotorInput = convertedThrottle - speedDifference;
             double rightMotorInput = convertedThrottle + speedDifference;
@@ -122,8 +121,8 @@ public class Drive {
          * 
          * double speedDifference = Math.atan(angleToMaintain) * throttle;
          * 
-         * double leftMotorInput = throttle - speedDifference; double rightMotorInput =
-         * throttle + speedDifference;
+         * double leftMotorInput = throttle - speedDifference; 
+         * double rightMotorInput = throttle + speedDifference;
          * 
          * there if you need it Zach 2019-1-20
          */
@@ -166,7 +165,7 @@ public class Drive {
         }
 
         double effectiveThrottle = Math.signum(throttle) * Math.pow(throttle * Math.signum(throttle), 1 + (throttle * Math.signum(throttle)));
-        double effectiveTurning = Math.signum(turning) * Math.pow(turning * Math.signum(turning), 1 + (turning * Math.signum(turning)));;
+        double effectiveTurning = Math.signum(turning) * Math.pow(turning * Math.signum(turning), 1 + (turning * Math.signum(turning)));
 
         double leftMotorInput = effectiveThrottle - effectiveTurning;
         double rightMotorInput = effectiveThrottle + effectiveTurning;

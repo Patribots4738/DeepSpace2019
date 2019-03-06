@@ -38,6 +38,16 @@ public class LEDStrip{
 
     }
 
+    public void setColors(int r, int g, int b, int... channels){
+
+        for(int i = 0; i  < channels.length; i++){
+
+            setColor(r, g, b, channels[i]);
+
+        }
+
+    }
+
     public int RGBToPercent(int val) {
 
         double valy = (double) val;

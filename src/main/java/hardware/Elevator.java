@@ -28,7 +28,7 @@ public class Elevator {
     int ballLevel = 0;
     int hatchLevel = 0;
 
-    boolean isPracticeBot = true;
+    boolean isPracticeBot = false;
 
     public Elevator(int talonCANID, int victorCANID) {
 

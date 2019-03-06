@@ -38,7 +38,7 @@ public class PIDSparkMaxGroup implements MotorGroup {
     public void control(double motorInput) {
 
         for (int i = 0; i < motors.size(); i++) {
-            motors.get(i).setOutputRange(motorInput* 0.98, motorInput * 1.02);
+            motors.get(i).setOutputRange(motorInput* 0.96, motorInput * 1.04);
             motors.get(i).setReference(motorInput, ControlType.kVelocity);
 
         }
