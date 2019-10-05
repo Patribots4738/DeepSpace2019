@@ -1,6 +1,6 @@
 package wrapper;
 
-import interfaces.MotorGroup;
+import wrapper.interfaces.MotorGroup;
 
 public class AdaptableDrive {
 
@@ -26,7 +26,7 @@ public class AdaptableDrive {
 
             for (int i = 0; i < motorGroups.length; i++) {
 
-                motorGroups[i].control(speed);
+                motorGroups[i].setSpeed(speed);
 
             }
 
@@ -36,7 +36,7 @@ public class AdaptableDrive {
 
             for (int j = 0; j < nameIndexes.length; j++) {
 
-                motorGroups[nameIndexes[j]].control(speed);
+                motorGroups[nameIndexes[j]].setSpeed(speed);
 
             }
 

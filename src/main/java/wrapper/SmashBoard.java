@@ -42,14 +42,14 @@ public class SmashBoard {
 
     public static String getDriveMode() {
 
-        return SmartDashboard.getString("drivemode", "curvy");
+        return SmartDashboard.getString("drivemode", "curvature");
 
     }
 
     public static String receiveDriverKeys() {
 
         return SmartDashboard.getString("driverKeys",
-                "throttle:1,turning:4,test1:7,forward:0,dropWheels:4,dropRamp:5");
+                "throttle:1,turning:4,test1:7,forward:0,leftRight:1,dropWheels:4,dropRamp:5");
 
     }
 

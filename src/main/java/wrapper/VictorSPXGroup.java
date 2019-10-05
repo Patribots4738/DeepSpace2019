@@ -3,7 +3,7 @@ package wrapper;
 import java.util.*;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-import interfaces.MotorGroup;
+import wrapper.interfaces.MotorGroup;
 
 public class VictorSPXGroup implements MotorGroup{
 
@@ -18,14 +18,14 @@ public class VictorSPXGroup implements MotorGroup{
         }
     }
 
-    public void control(double motorInput) {
+    public void setSpeed(double motorInput) {
         for (int i = 0; i < motors.size(); i++) {
 
             motors.get(i).set(ControlMode.PercentOutput, motorInput);
 
         }
 
-    }
+    } 
 
     public VictorSPX getMotor(int index){
 

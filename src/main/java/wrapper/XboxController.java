@@ -4,7 +4,8 @@ import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 
 public class XboxController extends Gamepad {
 
-	/*Zach here hopefully making your life a little easier
+	/*
+	Zach here hopefully making your life a little easier
 	so there are enums for all the different axes and buttons on xboxControllers
 	but sometimes you need to use their numbers, so here's a key for you:
 	Joysticks:
@@ -38,6 +39,12 @@ public class XboxController extends Gamepad {
 
 	public Vector getRightStick() {
 		return new Vector(this.getAxis(4), -this.getAxis(5));//this is inverted because for some reason full foward is -1
+	}
+
+	public double getAxis(int axisNum){
+
+		return this.getAxis(axisNum);
+
 	}
 
 	public double getRightTrigger() {

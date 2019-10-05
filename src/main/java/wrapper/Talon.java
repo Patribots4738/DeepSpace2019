@@ -17,6 +17,7 @@ public TalonSRX talon;
         talon.configSelectedFeedbackSensor(FeedbackDevice.CTRE_MagEncoder_Relative, 0, 100);
         talon.configAllowableClosedloopError(0, 0, 20);
         talon.config_kF(0, 0, 20);
+        talon.configContinuousCurrentLimit(37);
         talon.configNominalOutputForward(0, 20);
         talon.configNominalOutputReverse(0, 20);
         talon.configPeakOutputForward(1, 20);

@@ -62,7 +62,7 @@ public class Encoder {
 		
 	}
 	
-	public double getClickCount() {
+	public double getClicks() {
 		
 		double clicks = encoder.get();
 		

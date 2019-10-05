@@ -1,7 +1,7 @@
 package wrapper;
 
 import edu.wpi.first.wpilibj.AnalogGyro;
-import utils.MovingAverage;
+import wrapper.utils.MovingAverage;
 
 public class Gyro {
 	public AnalogGyro gyro;

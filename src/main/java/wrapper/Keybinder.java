@@ -1,7 +1,7 @@
 package wrapper;
 
 import wrapper.Gamepad;
-import utils.KeyBinderDictionary;
+import wrapper.utils.KeyBinderDictionary;
 
 public class Keybinder {// this is a dedicated class for deep space 2019
 
